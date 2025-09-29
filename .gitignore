@@ -1,6 +1,12 @@
 # Godot 4+ specific ignores
 .godot/
+# Godot files
+/.import/
+/export/
+/.godot/
+/user/
 .nomedia
+
 
 # Godot-specific ignores
 .import/
@@ -14,3 +20,20 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# User-specific files from Visual Studio, Rider, etc.
+.vscode/
+/.idea/
+*.suo
+*.user
+*.userprefs
+.idea/
+
+# C# build files
+bin/
+/obj/
+
+
+# OS-specific ignores (e.g., macOS, Windows)
+.DS_Store
+Thumbs.db
