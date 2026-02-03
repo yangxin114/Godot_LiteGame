@@ -9,15 +9,15 @@ namespace Logs
     /// 参数：LogInterval 控制统计间隔（秒）。
     /// 注意：此实现使用 Engine.GetFramesPerSecond() 与 OS 内存接口，依赖 Godot 提供的 API。
     /// </summary>
-    public class PerformanceMonitor : Node
+    public partial class PerformanceMonitor : Node
     {
         [Export]
-        public float LogInterval = 5.0f; // 采样并记录到日志的时间间隔（秒）
+        public double LogInterval = 5.0f; // 采样并记录到日志的时间间隔（秒）
 
         // 内部累积变量用于计算平均 FPS
-        private float _accum = 0f;
+        private double _accum = 0.0;
         private int _frames = 0;
-        private float _time = 0f;
+        private double _time = 0.0;
 
         public override void _Ready()
         {
@@ -28,7 +28,7 @@ namespace Logs
         /// 在 _Process 中累积帧数和时间，到达间隔时写入一条性能日志。
         /// 日志格式示例：Perf: avg_fps=60.0, frames=300, elapsed=5.00s, mem=12345678 bytes, peak=23456789 bytes
         /// </summary>
-        public override void _Process(float delta)
+        public override void _Process(double delta)
         {
             _accum += delta;
             _frames++;
@@ -42,7 +42,7 @@ namespace Logs
                 Logger.Info("Perf: avg_fps={0:F1}, frames={1}, elapsed={2:F2}s, mem={3} bytes, peak={4} bytes", avgFps, _frames, _accum, staticMem, peakMem);
 
                 // 重置采样
-                _accum = 0f;
+                _accum = 0.0;
                 _frames = 0;
             }
         }

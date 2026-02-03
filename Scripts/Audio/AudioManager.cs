@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Logs;
 
 namespace Audio
 {
@@ -15,7 +16,7 @@ namespace Audio
     /// 
     /// 使用方式：将此脚本作为 Autoload（单例）或在 Start 中创建并加入场景树。
     /// </summary>
-    public class AudioManager : Node
+    public partial class AudioManager : Node
     {
         /// <summary>
         /// 单例实例引用（当此节点被加入到场景树时自动设置）。
@@ -49,7 +50,7 @@ namespace Audio
             // 如果已有实例，记录警告（避免不经意创建多个实例）
             if (Instance != null && Instance != this)
             {
-                GD.PrintWarn("AudioManager: 已存在另一个实例。新的实例将覆盖全局 Instance 引用。");
+                Logs.Logger.Warn("AudioManager: 已存在另一个实例。新的实例将覆盖全局 Instance 引用。");
             }
             Instance = this;
 
@@ -165,7 +166,7 @@ namespace Audio
             var instNew = new SfxInstance { Player = player, Priority = priority };
             _activeSfx.Add(instNew);
             // 绑定完成回调（通过 bind 传入 player 引用）
-            player.Connect("finished", this, nameof(OnSfxFinished), new Godot.Collections.Array { player });
+            player.Connect("finished", Callable.From(() => OnSfxFinished(player)));
         }
 
         private void OnSfxFinished(AudioStreamPlayer player)
@@ -260,23 +261,13 @@ namespace Audio
         private void TweenFade(AudioStreamPlayer player, float targetDb, float duration, bool stopAfterFade = false)
         {
             if (player == null) return;
-            var tween = new Tween();
-            AddChild(tween);
+            var tween = GetTree().CreateTween();
             float from = player.VolumeDb;
-            tween.InterpolateProperty(player, "volume_db", from, targetDb, duration, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-            tween.Start();
-            tween.Connect("tween_all_completed", this, nameof(OnTweenCompleted), new Godot.Collections.Array { tween, player, stopAfterFade });
-        }
+            tween.TweenProperty(player, "volume_db", targetDb, duration);
+            tween.TweenCallback(Callable.From(player.QueueFree));
 
-        private void OnTweenCompleted(Tween tween, AudioStreamPlayer player, bool stopAfterFade)
-        {
-            tween.QueueFree();
-            if (stopAfterFade)
-            {
-                player.Stop();
-            }
         }
-
+        
         /// <summary>
         /// 设置总线音量（以分贝为单位）。
         /// busName 示例："Master", "SFX", "BGM"。请确保在 Project -> Audio -> Buses 中已创建这些 Bus。

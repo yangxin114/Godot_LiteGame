@@ -1,0 +1,97 @@
+[gd_scene format=3 uid="uid://cg1sl27js7j72"]
+
+[ext_resource type="Script" uid="uid://dlxlxlsuuksgp" path="res://Scripts/UI/Main.cs" id="1_dl0pg"]
+[ext_resource type="Texture2D" uid="uid://bewpleus3qv21" path="res://Asserts/main_bg.png" id="2_h303d"]
+[ext_resource type="FontFile" uid="uid://ddw0agtmi4p1o" path="res://Fonts/DotGothic16-Regular.ttf" id="3_ujd4t"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_y4ycm"]
+font = ExtResource("3_ujd4t")
+font_size = 160
+font_color = Color(1, 0.41960785, 0.41960785, 1)
+outline_size = 15
+outline_color = Color(0.30588236, 0.8039216, 0.76862746, 1)
+shadow_size = 25
+shadow_color = Color(0.6345139, 0.6928515, 0.9143023, 1)
+
+[sub_resource type="SystemFont" id="SystemFont_nt0jr"]
+subpixel_positioning = 0
+
+[node name="Control" type="Control" unique_id=1459740088]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dl0pg")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=554031309]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_h303d")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="." unique_id=1479836907]
+layout_mode = 1
+offset_left = 62.0
+offset_top = 25.0
+offset_right = 926.0
+offset_bottom = 306.0
+text = "女 巫 传 承"
+label_settings = SubResource("LabelSettings_y4ycm")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control" type="Control" parent="." unique_id=598150773]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -351.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="StartBtn" type="Button" parent="Control" unique_id=2129410637]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -335.5
+offset_top = 493.0
+offset_right = -192.5
+offset_bottom = 546.0
+grow_horizontal = 2
+theme_override_fonts/font = SubResource("SystemFont_nt0jr")
+theme_override_font_sizes/font_size = 32
+text = "开始游戏"
+
+[node name="SaveBtn" type="Button" parent="Control" unique_id=1240293292]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -335.5
+offset_top = 578.0
+offset_right = -191.5
+offset_bottom = 633.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 34
+text = "保存游戏"
+
+[node name="ExitBtn" type="Button" parent="Control" unique_id=1916346456]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -334.5
+offset_top = 673.0
+offset_right = -190.5
+offset_bottom = 728.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 34
+text = "退出游戏"

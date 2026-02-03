@@ -14,7 +14,7 @@ namespace Scenes
     /// - 添加式加载（Additive load）
     /// 使用方法：将此节点作为 Autoload 或在 Start 中创建并加入场景树。
     /// </summary>
-    public class SceneManager : Node
+    public partial class SceneManager : Node
     {
         public static SceneManager Instance { get; private set; }
 
@@ -31,7 +31,7 @@ namespace Scenes
         {
             if (Instance != null && Instance != this)
             {
-                GD.PrintWarn("SceneManager: 已存在另一个实例。新的实例将覆盖全局 Instance 引用。");
+                GD.Print($"SceneManager: 已存在另一个实例。新的实例将覆盖全局 Instance 引用。");
             }
             Instance = this;
 
@@ -104,7 +104,7 @@ namespace Scenes
         /// 添加式加载：加载一个 PackedScene 并作为子节点加入根节点（不会替换当前场景）。
         /// 返回已实例化的节点引用。
         /// </summary>
-        public Node? LoadAdditive(string path)
+        public Node LoadAdditive(string path)
         {
             var packed = GD.Load<PackedScene>(path);
             if (packed == null)
@@ -131,11 +131,9 @@ namespace Scenes
         /// </summary>
         public string GetCurrentScenePath()
         {
-            var current = GetTree().CurrentScene;
-            if (current == null) return string.Empty;
-            // CurrentScene 不总是保存原始文件路径；尝试读取拥有者或场景文件名
-            if (current.Filename != null) return current.Filename;
-            return string.Empty;
+            // 返回可用的当前场景路径，如果不可用则返回空字符串。
+            // 注意：Godot 的 CurrentScene 在运行时不一定保存原始文件路径，因此此方法在某些环境下可能返回空。
+            return GetTree().CurrentScene?.Filename ?? string.Empty;
         }
     }
 }

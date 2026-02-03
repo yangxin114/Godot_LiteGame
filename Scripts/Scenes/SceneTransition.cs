@@ -7,7 +7,7 @@ namespace Scenes
     /// 简单的场景切换过渡控件（全屏遮罩淡入/淡出）。
     /// 使用方法：将此节点挂到最顶层 CanvasLayer，调用 FadeIn/FadeOut 并等待完成。
     /// </summary>
-    public class SceneTransition : Control
+    public partial class SceneTransition : Control
     {
         private ColorRect _mask;
 
@@ -36,12 +36,10 @@ namespace Scenes
         public async Task FadeIn(float duration = 0.5f)
         {
             Visible = true;
-            var tween = new Tween();
-            AddChild(tween);
-            tween.InterpolateProperty(_mask, "color:a", _mask.Color.a, 1.0f, duration, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-            tween.Start();
+            var tween = GetTree().CreateTween();
+            tween.TweenProperty(_mask, "color:a", 1.0f, duration);
             await ToSignal(tween, "tween_all_completed");
-            tween.QueueFree();
+            tween.Kill();
         }
 
         /// <summary>
@@ -49,12 +47,10 @@ namespace Scenes
         /// </summary>
         public async Task FadeOut(float duration = 0.5f)
         {
-            var tween = new Tween();
-            AddChild(tween);
-            tween.InterpolateProperty(_mask, "color:a", _mask.Color.a, 0.0f, duration, Tween.TransitionType.Linear, Tween.EaseType.InOut);
-            tween.Start();
+            var tween = GetTree().CreateTween();
+            tween.TweenProperty(_mask, "color:a", 0.0f, duration);
             await ToSignal(tween, "tween_all_completed");
-            tween.QueueFree();
+            tween.Kill(); // 修复：使用Kill()而不是QueueFree()
             Visible = false;
         }
     }
