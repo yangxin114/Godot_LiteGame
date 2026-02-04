@@ -39,7 +39,7 @@ namespace Logs
                 var avgFps = _frames / _accum;
                 var staticMem = OS.GetStaticMemoryUsage();
                 var peakMem = OS.GetStaticMemoryPeakUsage();
-                Logger.Info("Perf: avg_fps={0:F1}, frames={1}, elapsed={2:F2}s, mem={3} bytes, peak={4} bytes", avgFps, _frames, _accum, staticMem, peakMem);
+                Logger2.Info("Perf: avg_fps={0:F1}, frames={1}, elapsed={2:F2}s, mem={3} bytes, peak={4} bytes", avgFps, _frames, _accum, staticMem, peakMem);
 
                 // 重置采样
                 _accum = 0.0;

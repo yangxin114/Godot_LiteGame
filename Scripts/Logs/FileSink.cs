@@ -24,6 +24,12 @@ namespace Logs
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private Task _writerTask;
 
+        // 添加计数器和上次刷新时间字段
+        private long _linesSinceLastFlush = 0;
+        private const long FLUSH_INTERVAL_LINES = 10;  // 每10行刷新一次
+        private DateTime _lastFlushTime = DateTime.UtcNow;
+        private const double FLUSH_INTERVAL_SECONDS = 1.0;  // 每1秒强制刷新一次
+
         /// <summary>
         /// 构造函数，传入目标文件路径。会创建目录并启动后台写入任务。
         /// </summary>
@@ -31,6 +37,7 @@ namespace Logs
         {
             _filePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
             Directory.CreateDirectory(Path.GetDirectoryName(_filePath) ?? ".");
+            Godot.GD.Print($"[FileSink] Log file path: {_filePath}");
             StartWriter();
         }
 
@@ -52,9 +59,25 @@ namespace Logs
                     {
                         while (!_cts.Token.IsCancellationRequested)
                         {
+                            int processedLines = 0;
                             while (_queue.TryDequeue(out var line))
                             {
                                 await writer.WriteLineAsync(line).ConfigureAwait(false);
+                                Interlocked.Increment(ref _linesSinceLastFlush);
+                                processedLines++;
+                                
+                                // 如果处理了太多行，暂停一下，让其他操作有机会执行
+                                if (processedLines >= 100)
+                                    break;
+                            }
+
+                            // 检查是否需要刷新：按行数或时间间隔
+                            if (Interlocked.Read(ref _linesSinceLastFlush) >= FLUSH_INTERVAL_LINES || 
+                                (DateTime.UtcNow - _lastFlushTime).TotalSeconds >= FLUSH_INTERVAL_SECONDS)
+                            {
+                                await writer.FlushAsync().ConfigureAwait(false);
+                                Interlocked.Exchange(ref _linesSinceLastFlush, 0);
+                                _lastFlushTime = DateTime.UtcNow;
                             }
 
                             // 当没有数据时短暂睡眠，避免 busy-loop

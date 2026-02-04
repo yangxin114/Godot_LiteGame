@@ -50,7 +50,7 @@ namespace Audio
             // 如果已有实例，记录警告（避免不经意创建多个实例）
             if (Instance != null && Instance != this)
             {
-                Logs.Logger.Warn("AudioManager: 已存在另一个实例。新的实例将覆盖全局 Instance 引用。");
+                Logs.Logger2.Warn("AudioManager: 已存在另一个实例。新的实例将覆盖全局 Instance 引用。");
             }
             Instance = this;
 
@@ -81,8 +81,8 @@ namespace Audio
             var source = _bgmAActive ? _bgmA : _bgmB;
 
             target.Stream = stream;
+            //target.Stream.Loop = loop;
             target.VolumeDb = -80f;
-            target.Looping = loop;
             target.Play();
 
             // 交叉淡入淡出：target 从 -80 -> 0，source 从 current -> -80，然后停止 source

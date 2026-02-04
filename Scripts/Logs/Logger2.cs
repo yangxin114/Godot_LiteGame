@@ -4,9 +4,10 @@ namespace Logs
 {
     /// <summary>
     /// 日志门面（便捷方法）。
-    /// 说明：代码中请优先使用 <see cref="Logger.Trace/Debug/Info/..."/> 这类方法来记录日志，方便统一替换和格式化。
+    /// 说明：代码中请优先使用 <see cref="Logger2.Trace/Debug/Info/..."/> 这类方法来记录日志，方便统一替换和格式化。\
+    /// 使用Logger2名字，因为Logger与Godot下Logger名字冲突
     /// </summary>
-    public static class Logger
+    public static class Logger2
     {
         /// <summary>
         /// 直接写入已生成的消息。

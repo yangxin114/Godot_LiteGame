@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Godot;
 
 namespace Logs
 {
@@ -85,7 +86,7 @@ namespace Logs
         internal static void Emit(LogLevel level, string message)
         {
             if (level < _minLevel) return;
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             foreach (var s in _sinks)
             {
                 try

@@ -41,9 +41,9 @@ namespace Logs
 
             // 写入本地日志（根据 fatal 标记选择等级）
             if (fatal)
-                Logger.Fatal(payload);
+                Logger2.Fatal(payload);
             else
-                Logger.Error(payload);
+                Logger2.Error(payload);
 
             // 若配置了远程上报，则尝试转发（吞掉回调异常以保证稳定性）
             try

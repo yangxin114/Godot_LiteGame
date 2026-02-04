@@ -28,12 +28,14 @@ namespace Logs
                     break;
                 case LogLevel.Warn:
                     // 警告输出，带上下文 tag
-                    GD.PrintWarning(msg, "ConsoleSink");
+                    GD.PushWarning(msg);
+                    GD.Print(msg);
                     break;
                 case LogLevel.Error:
                 case LogLevel.Fatal:
                     // 错误/致命错误输出到错误通道
-                    GD.PrintErr(msg);
+                    GD.PushError(msg);
+                    GD.Print(msg);
                     break;
                 default:
                     GD.Print(msg);
