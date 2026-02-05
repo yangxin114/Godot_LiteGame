@@ -1,0 +1,8 @@
+{
+  "Name": "FireWizard",
+  "Speed": 200.0,
+  "Health": 14,
+  "SpritePath": "res://Asserts/Players/Fire Wizard/Idle.png",
+  "ColorHex": "#FFDDAAFF",
+  "Abilities": ["Fireball", "FlameJet"]
+}

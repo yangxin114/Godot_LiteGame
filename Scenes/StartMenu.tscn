@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cg1sl27js7j72"]
 
-[ext_resource type="Script" uid="uid://dlxlxlsuuksgp" path="res://Scripts/UI/Main.cs" id="1_dl0pg"]
+[ext_resource type="Script" uid="uid://dymcdkl0fa4yx" path="res://Scripts/UI/StartMenu.cs" id="1_dl0pg"]
 [ext_resource type="Texture2D" uid="uid://bewpleus3qv21" path="res://Asserts/main_bg.png" id="2_h303d"]
 [ext_resource type="FontFile" uid="uid://ddw0agtmi4p1o" path="res://Fonts/DotGothic16-Regular.ttf" id="3_ujd4t"]
 

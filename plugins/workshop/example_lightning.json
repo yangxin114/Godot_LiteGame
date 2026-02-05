@@ -1,0 +1,8 @@
+{
+  "Name": "LightningMage",
+  "Speed": 220.0,
+  "Health": 12,
+  "SpritePath": "res://Asserts/Players/Lightning Mage/Idle.png",
+  "ColorHex": "#FFEEDDFF",
+  "Abilities": ["Dash", "LightningBolt"]
+}
