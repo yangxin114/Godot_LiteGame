@@ -17,7 +17,7 @@ namespace Characters
     public partial class BasePlayer : Node2D, IPlayer
     {
         /// <summary>
-        /// 内部状态机实例。
+        /// 内部状态机实例
         /// </summary>
         private StateMachine stateMachine;
 
