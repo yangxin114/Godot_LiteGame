@@ -16,7 +16,7 @@ namespace Characters
         /// <param name="parent">将被添加到的父节点（暂未用于布局）。</param>
         /// <param name="data">玩家定义数据</param>
         /// <returns>已初始化的 BasePlayer</returns>
-        public static BasePlayer Create(Node parent, Customization.PlayerData data)
+        public static BasePlayer Create(Node parent, PlayerData data)
         {
             var p = new BasePlayer();
             p.Init(data);
