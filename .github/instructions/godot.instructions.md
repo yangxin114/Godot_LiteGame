@@ -13,6 +13,7 @@ applyTo: '**'
   - res://assets/ — 资源（图片、音频）
   - res://ui/ — UI 场景/控件
 - 主场景与输入映射：保持 Project Settings 中 Main Scene 与 Input Map 不变，除非用户明确要求修改。
+- 会话必须使用中文回复
 
 ## 代码风格与约定
 - 语言：使用 C# 语言，不适用GDScript。
