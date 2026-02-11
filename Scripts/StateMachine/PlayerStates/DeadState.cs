@@ -1,8 +1,8 @@
 using Godot;
 using System;
-using PlayerStateMachine;
+using StateMachine;
 
-namespace PlayerStateMachine.PlayerStates
+namespace StateMachine.PlayerStates
 {
     /// <summary>
     /// 死亡状态（Dead）。进入后停止行为，可在此处播放死亡动画并释放节点。

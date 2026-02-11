@@ -1,8 +1,8 @@
 using Godot;
 using System;
-using PlayerStateMachine;
+using StateMachine;
 
-namespace PlayerStateMachine.PlayerStates
+namespace StateMachine.PlayerStates
 {
     /// <summary>
     /// 空闲状态（Idle）。

@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace PlayerStateMachine
+namespace StateMachine
 {
     /// <summary>
     /// 状态基类（State）。

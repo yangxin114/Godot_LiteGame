@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-namespace PlayerStateMachine
+namespace StateMachine
 {
     /// <summary>
     /// 简单的状态机实现：

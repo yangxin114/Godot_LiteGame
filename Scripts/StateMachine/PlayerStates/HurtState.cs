@@ -1,8 +1,8 @@
 using Godot;
 using System;
-using PlayerStateMachine;
+using StateMachine;
 
-namespace PlayerStateMachine.PlayerStates
+namespace StateMachine.PlayerStates
 {
     /// <summary>
     /// 受伤状态（Hurt）。受伤后短暂无敌/僵直，然后返回 Idle 或根据血量进入 Dead。
