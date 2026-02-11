@@ -2,47 +2,146 @@ using Godot;
 using System;
 using System.Linq;
 using Characters;
-using Attributes;
+using Numerical;
+using Logs;
+
 namespace Characters
 {
 	/*
 	 * Player.cs
 	 *
-	 * 简单的前端包装器，用于在场景中加载并显示可定制的玩家。
-	 * - 从创意工坊目录加载 PlayerData（JSON）列表
-	 * - 选择一个 PlayerData（若无则使用默认）
-	 * - 通过 PlayerFactory 创建运行时的 BasePlayer 并将其作为子节点添加到场景
-	 *
-	 * 说明：该文件仅负责加载和实例化玩家；玩家的行为、状态机、渲染等逻辑
-	 * 在 `Characters.BasePlayer` 与 `PlayerStateMachine` 中实现。
+	 * 玩家主控制器类
+	 * 负责协调各个子系统的协作
 	 */
-	public partial class Player : AttributesOwner
+	public partial class Player : StatOwner
 	{
-		public PlayerData PlayerData { get; private set; }
-		public PlayerViewData PlayerViewData { get; private set; }
-		public void SetState(string stateName)
-		{
-		}
+		[Export] public PlayerData PlayerData { get; set; }
+		[Export] public PlayerViewData PlayerViewData { get; set; }
+		
+		// 子系统组件
+		private PlayerStatsManager _statsManager;
+		private PlayerInputHandler _inputHandler;
+		private PlayerCombatSystem _combatSystem;
+		private PlayerMovementSystem _movementSystem;
+		private PlayerStateManager _stateManager;
 
 		/// <summary>
-		/// 节点进入场景树时被调用：尝试从 workshop 加载玩家定义并实例化一个运行时玩家。
+		/// 节点进入场景树时被调用
 		/// </summary>
 		public override void _Ready()
 		{
-			// 从工作坊目录加载所有玩家定义
-			var players = PlayerLoader.LoadAll();
-			PlayerData chosen = null;
-
-			if (players != null && players.Count > 0)
-				chosen = players[0];
+			Logger2.Info("Player._Ready: 开始初始化玩家系统");
+			
+			// 初始化各个子系统
+			InitializeSubsystems();
+				
+			Logger2.Info("Player._Ready: 玩家系统初始化完成");
+		}
+		
+		/// <summary>
+		/// 初始化所有子系统组件
+		/// </summary>
+		private void InitializeSubsystems()
+		{
+			// 初始化属性管理器
+			_statsManager = new PlayerStatsManager();
+			AddChild(_statsManager);
+			_statsManager.Initialize(this);
+			
+			// 初始化输入处理器
+			_inputHandler = new PlayerInputHandler();
+			AddChild(_inputHandler);
+			_inputHandler.Initialize(this);
+			
+			// 初始化战斗系统
+			_combatSystem = new PlayerCombatSystem();
+			AddChild(_combatSystem);
+			_combatSystem.Initialize(this);
+			
+			// 初始化移动系统
+			_movementSystem = new PlayerMovementSystem();
+			AddChild(_movementSystem);
+			_movementSystem.Initialize(this);
+			
+			// 初始化状态管理器
+			_stateManager = new PlayerStateManager();
+			AddChild(_stateManager);
+			_stateManager.Initialize(this);
+			
+			Logger2.Info("Player: 所有子系统初始化完成");
 		}
 
 		/// <summary>
-		/// 每帧调用，将更新转发给运行时玩家（如果存在）。
+		/// 初始化玩家属性系统（委托给StatsManager）
+		/// </summary>
+		public void InitStats()
+		{
+			_statsManager?.InitStats();
+		}
+		
+		/// <summary>
+		/// 设置玩家状态
+		/// </summary>
+		public void SetState(string stateName)
+		{
+			_stateManager?.ForceStateChange(stateName);
+		}
+
+		/// <summary>
+		/// 每帧更新
 		/// </summary>
 		public override void _Process(double delta)
 		{
-
+			// 更新输入系统
+			_inputHandler?.Update(delta);
+			
+			// 更新战斗系统
+			_combatSystem?.Update(delta);
+			
+			// 更新移动系统
+			_movementSystem?.Update(delta);
+			
+			// 更新状态管理器
+			_stateManager?.Update(delta);
+			
+			// 处理攻击输入
+			if (_inputHandler?.IsAttacking ?? false)
+			{
+				_combatSystem?.PerformAttack();
+			}
+			
+			// 处理移动输入
+			if (_inputHandler?.IsMoving() ?? false)
+			{
+				// TODO: 通知移动系统处理移动
+			}
 		}
+		
+		/// <summary>
+		/// 物理更新
+		/// </summary>
+		public override void _PhysicsProcess(double delta)
+		{
+			// 物理相关的更新逻辑
+		}
+		
+		/// <summary>
+		/// 清理资源
+		/// </summary>
+		public override void _ExitTree()
+		{
+			Logger2.Info("Player: 开始清理资源");
+			
+			// 子系统会自动清理（因为是子节点）
+			
+			Logger2.Info("Player: 资源清理完成");
+		}
+		
+		// 公共属性访问器
+		public PlayerStatsManager StatsManager => _statsManager;
+		public PlayerInputHandler InputHandler => _inputHandler;
+		public PlayerCombatSystem CombatSystem => _combatSystem;
+		public PlayerMovementSystem MovementSystem => _movementSystem;
+		public PlayerStateManager StateManager => _stateManager;
 	}
 }

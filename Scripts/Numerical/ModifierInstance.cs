@@ -1,7 +1,7 @@
 using Godot;
 using Logs;
 
-namespace Attributes
+namespace Numerical
 {
     /// <summary>
     /// ModifierInstance 是 ModifierDef 的运行时实例
@@ -20,12 +20,12 @@ namespace Attributes
         /// <summary>
         /// 来源（装备 / Buff / 技能）
         /// </summary>
-        public AttributesOwner Source;
+        public StatOwner Source;
 
         /// <summary>
         /// 上下文（命中目标、技能类型等）
         /// </summary>
-        public AttributeContext Context;
+        public StatContext Context;
 
         /// <summary>
         /// 是否已失效
@@ -41,7 +41,7 @@ namespace Attributes
         /// 解析修正值
         /// （后期可以支持动态数值）
         /// </summary>
-        public float ResolveValue(AttributeContainer container)
+        public float ResolveValue(StatContainer container)
         {
             // 未来可加入动态计算（基于容器/上下文）
             return Def.Value;

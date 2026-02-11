@@ -1,6 +1,6 @@
 using Godot;
 using System;
-namespace Attributes
+namespace Numerical
 {
     /// <summary>
     /// ModifierDef 描述“一种数值修改规则”
@@ -28,7 +28,7 @@ namespace Attributes
         /// <summary>
         /// 影响的目标属性
         /// </summary>
-        [Export] public AttributeDef Target;
+        [Export] public StatDef Target;
 
         /// <summary>
         /// 运算方式

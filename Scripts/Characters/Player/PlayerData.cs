@@ -1,4 +1,4 @@
-using Attributes;
+using Numerical;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -15,13 +15,16 @@ namespace Characters
     public partial class PlayerData : Resource
     {
         /// <summary>玩家名称</summary>
-        [Export] public AttributeDef Name { get; set; }
+        [Export] public string Name { get; set; }
 
         /// <summary>移动速度（像素/秒，默认 200）</summary>
-        [Export] public AttributeDef MoveSpeed { get; set; }
+        [Export] public float MoveSpeed { get; set; }
 
-        /// <summary>生命值</summary>
-        [Export] public AttributeDef Health { get; set; }
+        /// <summary>当前生命值</summary>
+        [Export] public float CurrentHealth { get; set; }
+
+        /// <summary>最大生命值</summary>
+        [Export] public float MaxHealth { get; set; }
 
     }
 }

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 
-namespace Attributes
+namespace Numerical
 {
     /// <summary>
-    /// AttributeInstance 表示：
+    /// StatInstance 表示：
     /// “某个实体身上的某个属性”
     ///
     /// 例如：
@@ -11,14 +11,14 @@ namespace Attributes
     /// - 子弹身上的伤害
     ///
     /// ⚠️ 核心原则：
-    /// AttributeInstance 只存在于 AttributeContainer 中
+    /// StatInstance 只存在于 StatContainer 中
     /// </summary>
-    public class AttributeInstance
+    public class StatInstance
     {
         /// <summary>
         /// 对应的属性定义
         /// </summary>
-        public AttributeDef Def;
+        public StatDef Def;
 
         /// <summary>
         /// 基础值（未修正）

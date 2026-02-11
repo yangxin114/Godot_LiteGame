@@ -2,24 +2,24 @@ using System;
 using System.Collections.Generic;
 using Logs;
 
-namespace Attributes
+namespace Numerical
 {
     /// <summary>
-    /// AttributeContainer 是某个实体的“数值大脑”
+    /// StatContainer 是某个实体的“数值大脑”
     ///
     /// 玩家 / 敌人 / 子弹 / 召唤物
     /// 全部使用同一套逻辑
     /// </summary>
-    public class AttributeContainer
+    public class StatContainer
     {
-        private readonly Dictionary<string, AttributeInstance> _attributes = new();
+        private readonly Dictionary<string, StatInstance> _stats = new();
 
-        public AttributesOwner Owner;
+        public StatOwner Owner;
 
         /// <summary>
-        /// 属性变更事件：(AttributeDef, oldValue, newValue)
+        /// 属性变更事件：(StatDef, oldValue, newValue)
         /// </summary>
-        public event Action<AttributeDef, float, float> ValueChanged;
+        public event Action<StatDef, float, float> ValueChanged;
 
         /// <summary>
         /// 修饰器添加事件
@@ -34,34 +34,34 @@ namespace Attributes
         /// <summary>
         /// 获取属性最终值
         /// </summary>
-        public float Get(AttributeDef def, AttributeContext ctx = null)
+        public float Get(StatDef def, StatContext ctx = null)
         {
-            var attr = EnsureAttribute(def);
+            var stat = EnsureStat(def);
 
             // 先清理过期的修饰器，避免影响计算
-            CleanExpiredModifiers(attr);
+            CleanExpiredModifiers(stat);
 
-            var old = attr.FinalValue;
+            var old = stat.FinalValue;
 
-            if (attr.Dirty)
+            if (stat.Dirty)
             {
-                AttributeCalculator.Recalculate(attr, ctx);
-                if (Math.Abs(old - attr.FinalValue) > 1e-6f)
+                StatCalculator.Recalculate(stat, ctx);
+                if (Math.Abs(old - stat.FinalValue) > 1e-6f)
                 {
-                    ValueChanged?.Invoke(def, old, attr.FinalValue);
-                    Logger2.Info("AttributeContainer", "ValueChanged {0} {1} -> {2}", def.Id, old, attr.FinalValue);
+                    ValueChanged?.Invoke(def, old, stat.FinalValue);
+                    Logger2.Info("AttributeContainer", "ValueChanged {0} {1} -> {2}", def.Id, old, stat.FinalValue);
                 }
             }
 
-            return attr.FinalValue;
+            return stat.FinalValue;
         }
 
         /// <summary>
         /// 设置基础值
         /// </summary>
-        public void SetBase(AttributeDef def, float value)
+        public void SetBase(StatDef def, float value)
         {
-            var attr = EnsureAttribute(def);
+            var attr = EnsureStat(def);
             attr.BaseValue = value;
             attr.Dirty = true;
         }
@@ -73,11 +73,11 @@ namespace Attributes
         {
             if (mod == null || mod.Def == null || mod.Def.Target == null)
             {
-                Logger2.Warn("AttributeContainer", "Attempt to add invalid modifier");
+                Logger2.Warn("StatContainer", "Attempt to add invalid modifier");
                 return;
             }
 
-            var attr = EnsureAttribute(mod.Def.Target);
+            var attr = EnsureStat(mod.Def.Target);
 
             // 设置应用时间
             mod.ApplyTime = (float)System.DateTime.UtcNow.Subtract(System.DateTime.UnixEpoch).TotalSeconds;
@@ -88,7 +88,7 @@ namespace Attributes
                 var existing = attr.Modifiers.Find(m => m.Def == mod.Def && m.Source == mod.Source);
                 if (existing != null)
                 {
-                    Logger2.Debug("AttributeContainer", "Modifier unique per source exists, ignoring add (or refresh). Def={0}", mod.Def.Target.Id);
+                    Logger2.Debug("StatContainer", "Modifier unique per source exists, ignoring add (or refresh). Def={0}", mod.Def.Target.Id);
                     // 如果是 RefreshDuration，则刷新时间
                     if (mod.Def.StackMode == ModifierStackMode.RefreshDuration)
                     {
@@ -103,7 +103,7 @@ namespace Attributes
                 var existing = attr.Modifiers.Find(m => m.Def == mod.Def);
                 if (existing != null)
                 {
-                    Logger2.Debug("AttributeContainer", "Modifier unique global exists, ignoring add. Def={0}", mod.Def.Target.Id);
+                    Logger2.Debug("StatContainer", "Modifier unique global exists, ignoring add. Def={0}", mod.Def.Target.Id);
                     if (mod.Def.StackMode == ModifierStackMode.RefreshDuration)
                     {
                         existing.ApplyTime = mod.ApplyTime;
@@ -116,7 +116,7 @@ namespace Attributes
             attr.Modifiers.Add(mod);
             attr.Dirty = true;
             ModifierAdded?.Invoke(mod);
-            Logger2.Info("AttributeContainer", "ModifierAdded {0} from {1}", mod.Def.Target.Id, mod.Source?.Name ?? "<anon>");
+            Logger2.Info("StatContainer", "ModifierAdded {0} from {1}", mod.Def.Target.Id, mod.Source?.Name ?? "<anon>");
         }
 
         /// <summary>
@@ -125,63 +125,63 @@ namespace Attributes
         public void RemoveModifier(ModifierInstance mod)
         {
             if (mod == null || mod.Def == null || mod.Def.Target == null) return;
-            if (!_attributes.TryGetValue(mod.Def.Target.Id, out var attr)) return;
+            if (!_stats.TryGetValue(mod.Def.Target.Id, out var attr)) return;
             if (attr.Modifiers.Remove(mod))
             {
                 attr.Dirty = true;
                 ModifierRemoved?.Invoke(mod);
-                Logger2.Info("AttributeContainer", "ModifierRemoved {0}", mod.Def.Target.Id);
+                Logger2.Info("StatContainer", "ModifierRemoved {0}", mod.Def.Target.Id);
             }
         }
 
         /// <summary>
         /// 清理过期的修饰器
         /// </summary>
-        private void CleanExpiredModifiers(AttributeInstance attr)
+        private void CleanExpiredModifiers(StatInstance stat)
         {
             bool removed = false;
-            for (int i = attr.Modifiers.Count - 1; i >= 0; i--)
+            for (int i = stat.Modifiers.Count - 1; i >= 0; i--)
             {
-                var m = attr.Modifiers[i];
+                var m = stat.Modifiers[i];
                 if (m.IsExpired())
                 {
-                    attr.Modifiers.RemoveAt(i);
+                    stat.Modifiers.RemoveAt(i);
                     removed = true;
                     ModifierRemoved?.Invoke(m);
-                    Logger2.Debug("AttributeContainer", "Auto-removed expired modifier on {0}", attr.Def?.Id ?? "?");
+                    Logger2.Debug("StatContainer", "Auto-removed expired modifier on {0}", stat.Def?.Id ?? "?");
                 }
             }
-            if (removed) attr.Dirty = true;
+            if (removed) stat.Dirty = true;
         }
 
         /// <summary>
         /// 确保属性存在（从定义生成实例）
         /// </summary>
-        public AttributeInstance EnsureAttribute(AttributeDef def)
+        public StatInstance EnsureStat(StatDef def)
         {
-            if (!_attributes.TryGetValue(def.Id, out var attr))
+            if (!_stats.TryGetValue(def.Id, out var stat))
             {
-                attr = new AttributeInstance
+                stat = new StatInstance
                 {
                     Def = def,
                     BaseValue = def.DefaultValue,
                     FinalValue = def.DefaultValue,
                     Dirty = true
                 };
-                _attributes[def.Id] = attr;
-                Logger2.Info("AttributeContainer", "EnsureAttribute created {0}", def.Id);
+                _stats[def.Id] = stat;
+                Logger2.Info("StatContainer", "EnsureStat created {0}", def.Id);
             }
-            return attr;
+            return stat;
         }
 
         /// <summary>
-        /// 从一组 AttributeDef 初始化容器
+        /// 从一组 StatDef 初始化容器
         /// </summary>
-        public void InitializeFromDefs(IEnumerable<AttributeDef> defs)
+        public void InitializeFromDefs(IEnumerable<StatDef> defs)
         {
             foreach (var d in defs)
             {
-                EnsureAttribute(d);
+                EnsureStat(d);
             }
         }
     }

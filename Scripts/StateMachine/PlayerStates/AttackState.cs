@@ -27,7 +27,7 @@ namespace StateMachine.PlayerStates
             if (elapsed >= duration)
             {
                 // 回到空闲状态
-                (owner as Characters.BasePlayer)?.SetState("Idle");
+                // (owner as Characters.BasePlayer)?.SetState("Idle");
             }
         }
     }

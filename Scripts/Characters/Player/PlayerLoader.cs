@@ -92,7 +92,7 @@ namespace Characters
 
                 // 返回合并后的列表（按键名排序以保证稳定性）
                 var result = new List<PlayerData>(dict.Values);
-                result.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+                // result.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
                 return result;
             }
             catch (Exception e)

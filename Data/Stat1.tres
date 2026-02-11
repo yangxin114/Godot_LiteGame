@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="StatDef" format=3 uid="uid://dhdpn8oyw0gq3"]
+
+[ext_resource type="Script" uid="uid://c6f416cd1n86b" path="res://Scripts/Numerical/StatDef.cs" id="1_834ux"]
+
+[resource]
+script = ExtResource("1_834ux")
+metadata/_custom_type_script = "uid://c6f416cd1n86b"

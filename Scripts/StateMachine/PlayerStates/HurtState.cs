@@ -26,14 +26,14 @@ namespace StateMachine.PlayerStates
             if (elapsed >= duration)
             {
                 // 如果血量为 0 或更低，切换到 Dead，否则回到 Idle
-                var bp = owner as Characters.BasePlayer;
-                if (bp != null)
-                {
-                    if (bp.Health <= 0)
-                        bp.SetState("Dead");
-                    else
-                        bp.SetState("Idle");
-                }
+                // var bp = owner as Characters.BasePlayer;
+                // if (bp != null)
+                // {
+                //     if (bp.Health <= 0)
+                //         bp.SetState("Dead");
+                //     else
+                //         bp.SetState("Idle");
+                // }
             }
         }
     }
