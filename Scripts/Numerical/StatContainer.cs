@@ -14,7 +14,7 @@ namespace Numerical
     {
         private readonly Dictionary<string, StatInstance> _stats = new();
 
-        public StatOwner Owner;
+        public IStatOwner Owner;
 
         /// <summary>
         /// 属性变更事件：(StatDef, oldValue, newValue)
@@ -116,7 +116,7 @@ namespace Numerical
             attr.Modifiers.Add(mod);
             attr.Dirty = true;
             ModifierAdded?.Invoke(mod);
-            Logger2.Info("StatContainer", "ModifierAdded {0} from {1}", mod.Def.Target.Id, mod.Source?.Name ?? "<anon>");
+            Logger2.Info("StatContainer", "ModifierAdded {0} from {1}", mod.Def.Target.Id, mod.Source?.ToString() ?? "null");
         }
 
         /// <summary>

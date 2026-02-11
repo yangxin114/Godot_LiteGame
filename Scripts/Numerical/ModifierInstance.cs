@@ -20,7 +20,7 @@ namespace Numerical
         /// <summary>
         /// 来源（装备 / Buff / 技能）
         /// </summary>
-        public StatOwner Source;
+        public IStatOwner Source;
 
         /// <summary>
         /// 上下文（命中目标、技能类型等）

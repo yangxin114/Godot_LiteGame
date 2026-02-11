@@ -4,4 +4,8 @@
 
 [resource]
 script = ExtResource("1_3waei")
+Name = "默认角色"
+MoveSpeed = 30.0
+CurrentHealth = 50.0
+MaxHealth = 100.0
 metadata/_custom_type_script = "uid://bflxfeo357oyi"

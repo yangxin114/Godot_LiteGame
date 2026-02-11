@@ -8,22 +8,26 @@ namespace Characters
     /// <summary>
     /// 玩家战斗系统
     /// 负责处理攻击、受击、技能释放等战斗相关逻辑
+    /// 针对俯视角2D游戏优化
     /// </summary>
     public partial class PlayerCombatSystem : Node
     {
         private Player _player;
+        private Node2D _playerNode;
         private bool _isInitialized = false;
         
         // 战斗状态
         private bool _isAttacking = false;
         private double _attackCooldown = 0.0;
         private double _attackTimer = 0.0;
+        private Vector2 _attackDirection = Vector2.Zero; // 攻击方向
         
         // 战斗配置
         [Export] public float BaseAttackDamage { get; set; } = 10.0f;
         [Export] public float AttackRange { get; set; } = 50.0f;
         [Export] public float AttackCooldownTime { get; set; } = 0.5f;
         [Export] public float KnockbackForce { get; set; } = 200.0f;
+        [Export] public bool UseMouseAim { get; set; } = false; // 是否使用鼠标瞄准
 
         /// <summary>
         /// 初始化战斗系统
@@ -37,6 +41,7 @@ namespace Characters
             }
 
             _player = player ?? throw new ArgumentNullException(nameof(player));
+            _playerNode = player.GetNode<Node2D>("."); // 获取Player的Node2D组件
             _isInitialized = true;
             
             Logger2.Info("PlayerCombatSystem: 初始化完成");
@@ -55,12 +60,29 @@ namespace Characters
         /// <summary>
         /// 执行攻击动作
         /// </summary>
-        public void PerformAttack()
+        public void PerformAttack(Vector2? direction = null)
         {
             if (!_isInitialized || _isAttacking || _attackCooldown > 0)
                 return;
                 
-            Logger2.Info("PlayerCombatSystem: 执行攻击");
+            // 确定攻击方向
+            if (direction.HasValue)
+            {
+                _attackDirection = direction.Value.Normalized();
+            }
+            else if (UseMouseAim && _playerNode != null)
+            {
+                // 使用鼠标瞄准
+                Vector2 mousePos = GetViewport().GetMousePosition();
+                _attackDirection = (_playerNode.GetGlobalMousePosition() - _playerNode.GlobalPosition).Normalized();
+            }
+            else
+            {
+                // 使用最后移动方向
+                _attackDirection = _player?.InputHandler?.LastMoveDirection ?? Vector2.Right;
+            }
+                
+            Logger2.Info("PlayerCombatSystem: 执行攻击，方向: ({0:F2}, {1:F2})", _attackDirection.X, _attackDirection.Y);
             
             // 设置攻击状态
             _isAttacking = true;
@@ -71,10 +93,10 @@ namespace Characters
             float damage = CalculateDamage();
             
             // 检测攻击范围内的敌人
-            DetectAndDamageEnemies(damage);
+            DetectAndDamageEnemies(damage, _attackDirection);
             
             // 触发攻击动画和特效
-            TriggerAttackEffects();
+            TriggerAttackEffects(_attackDirection);
         }
         
         /// <summary>
@@ -91,7 +113,7 @@ namespace Characters
                 var physicalDamageDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.PhysicalDamage);
                 if (physicalDamageDef != null)
                 {
-                    damage += _player.Stats.Get(physicalDamageDef);
+                    damage += _player.GetStatContainer().Get(physicalDamageDef);
                 }
                 
                 var critChanceDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.CriticalChance);
@@ -99,11 +121,11 @@ namespace Characters
                 
                 if (critChanceDef != null && critDamageDef != null)
                 {
-                    float critChance = _player.Stats.Get(critChanceDef);
+                    float critChance = _player.GetStatContainer().Get(critChanceDef);
                     if (GD.Randf() < critChance)
                     {
-                        damage *= _player.Stats.Get(critDamageDef);
-                        Logger2.Info("PlayerCombatSystem: 暴击! 伤害倍数: {0}", _player.Stats.Get(critDamageDef));
+                        damage *= _player.GetStatContainer().Get(critDamageDef);
+                        Logger2.Info("PlayerCombatSystem: 暴击! 伤害倍数: {0}", _player.GetStatContainer().Get(critDamageDef));
                     }
                 }
             }
@@ -114,29 +136,45 @@ namespace Characters
         /// <summary>
         /// 检测并伤害范围内的敌人
         /// </summary>
-        private void DetectAndDamageEnemies(float damage)
+        private void DetectAndDamageEnemies(float damage, Vector2 attackDirection)
         {
-            // TODO: 实际的碰撞检测和敌人伤害逻辑
-            // 这里只是示例代码
-            Logger2.Debug("PlayerCombatSystem: 检测 {0} 范围内的敌人，造成 {1} 伤害", AttackRange, damage);
+            if (_playerNode == null) return;
             
-            // 示例：假设有敌人在这个范围内
-            // var enemies = GetEnemiesInRange(AttackRange);
+            // 计算攻击区域（扇形区域）
+            Vector2 attackOrigin = _playerNode.GlobalPosition;
+            Vector2 attackEnd = attackOrigin + attackDirection * AttackRange;
+            
+            Logger2.Debug("PlayerCombatSystem: 检测 {0} 范围内的敌人，造成 {1} 伤害", AttackRange, damage);
+            Logger2.Debug("PlayerCombatSystem: 攻击起点: ({0:F1}, {1:F1}), 方向: ({2:F2}, {3:F2})", 
+                attackOrigin.X, attackOrigin.Y, attackDirection.X, attackDirection.Y);
+            
+            // TODO: 实际的碰撞检测和敌人伤害逻辑
+            // 这里需要实现：
+            // 1. 获取攻击范围内的敌人
+            // 2. 检查敌人是否在攻击角度范围内
+            // 3. 应用伤害和击退效果
+            //
+            // 示例伪代码：
+            // var enemies = GetEnemiesInSector(attackOrigin, attackDirection, AttackRange, 90); // 90度扇形
             // foreach (var enemy in enemies)
             // {
             //     enemy.TakeDamage(damage, this);
+            //     enemy.ApplyKnockback(attackDirection * KnockbackForce);
             // }
         }
         
         /// <summary>
         /// 触发攻击特效
         /// </summary>
-        private void TriggerAttackEffects()
+        private void TriggerAttackEffects(Vector2 attackDirection)
         {
             // TODO: 播放攻击动画
             // TODO: 播放攻击音效
             // TODO: 产生粒子效果
-            Logger2.Debug("PlayerCombatSystem: 触发攻击特效");
+            // TODO: 显示攻击轨迹或范围指示器
+            
+            Logger2.Debug("PlayerCombatSystem: 触发攻击特效，攻击方向: ({0:F2}, {1:F2})", 
+                attackDirection.X, attackDirection.Y);
         }
         
         /// <summary>
@@ -157,8 +195,8 @@ namespace Characters
                 var currentHealthDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.CurrentHealth);
                 if (currentHealthDef != null)
                 {
-                    float currentHealth = _player.Stats.Get(currentHealthDef);
-                    _player.Stats.SetBase(currentHealthDef, currentHealth - reducedDamage);
+                    float currentHealth = _player.GetStatContainer().Get(currentHealthDef);
+                    _player.GetStatContainer().SetBase(currentHealthDef, currentHealth - reducedDamage);
                 }
             }
             
@@ -177,7 +215,7 @@ namespace Characters
             var armorDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.Armor);
             if (armorDef != null)
             {
-                float armor = _player.Stats.Get(armorDef);
+                float armor = _player.GetStatContainer().Get(armorDef);
                 // 简单的伤害减免公式
                 float reduction = armor / (armor + 100);
                 damage *= (1.0f - reduction);
@@ -194,7 +232,8 @@ namespace Characters
             // TODO: 播放受击动画
             // TODO: 播放受击音效
             // TODO: 产生受击特效
-            // TODO: 应用击退效果
+            // TODO: 应用击退效果（如果需要）
+            
             Logger2.Debug("PlayerCombatSystem: 触发受击效果，伤害: {0}", damage);
         }
         
@@ -240,6 +279,14 @@ namespace Characters
         public double GetRemainingCooldown()
         {
             return _attackCooldown;
+        }
+        
+        /// <summary>
+        /// 获取当前攻击方向
+        /// </summary>
+        public Vector2 GetAttackDirection()
+        {
+            return _attackDirection;
         }
         
         /// <summary>

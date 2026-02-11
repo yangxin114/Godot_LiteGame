@@ -8,8 +8,8 @@ namespace Numerical
     ///
     /// Player / Enemy / Projectile / Skill
     /// </summary>
-    public abstract partial class StatOwner : Node
+    public interface IStatOwner
     {
-        public StatContainer Stats = new();
+        public StatContainer GetStatContainer();
     }
 }

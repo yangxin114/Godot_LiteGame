@@ -108,15 +108,15 @@ namespace Numerical
             _statIndex = new Dictionary<string, StatDef>();
             
             // 基础属性
-            AddStatDef(_cachedStats, CurrentHealth, "当前生命值", StatCategory.Survival);
-            AddStatDef(_cachedStats, MaxHealth, "最大生命值", StatCategory.Survival);
-            AddStatDef(_cachedStats, CurrentMana, "当前法力值", StatCategory.Survival);
-            AddStatDef(_cachedStats, MaxMana, "最大法力值", StatCategory.Survival);
-            AddStatDef(_cachedStats, CurrentStamina, "当前体力值", StatCategory.Survival);
-            AddStatDef(_cachedStats, MaxStamina, "最大体力值", StatCategory.Survival);
-            AddStatDef(_cachedStats, MoveSpeed, "移动速度", StatCategory.Movement);
-            AddStatDef(_cachedStats, AttackSpeed, "攻击速度", StatCategory.Combat);
-            AddStatDef(_cachedStats, CastSpeed, "施法速度", StatCategory.Combat);
+            AddStatDef(_cachedStats, CurrentHealth, "当前生命值", StatCategory.Survival, 100f);
+            AddStatDef(_cachedStats, MaxHealth, "最大生命值", StatCategory.Survival, 100f);
+            AddStatDef(_cachedStats, CurrentMana, "当前法力值", StatCategory.Survival, 100f);
+            AddStatDef(_cachedStats, MaxMana, "最大法力值", StatCategory.Survival, 100f);
+            AddStatDef(_cachedStats, CurrentStamina, "当前体力值", StatCategory.Survival, 100f);
+            AddStatDef(_cachedStats, MaxStamina, "最大体力值", StatCategory.Survival, 100f);
+            AddStatDef(_cachedStats, MoveSpeed, "移动速度", StatCategory.Movement, 200f);
+            AddStatDef(_cachedStats, AttackSpeed, "攻击速度", StatCategory.Combat, 1f);
+            AddStatDef(_cachedStats, CastSpeed, "施法速度", StatCategory.Combat, 1f);
 
             // 战斗属性
             AddStatDef(_cachedStats, PhysicalDamage, "物理伤害", StatCategory.Combat);
@@ -247,12 +247,13 @@ namespace Numerical
             _isInitialized = false;
         }
 
-        private void AddStatDef(List<StatDef> list, string id, string displayName, StatCategory category)
+        private void AddStatDef(List<StatDef> list, string id, string displayName, StatCategory category, float defaultValue = 0f)
         {
             var statDef = new StatDef();
             statDef.Id = id;
             statDef.DisplayName = displayName;
             statDef.Category = category;
+            statDef.DefaultValue = defaultValue;
             list.Add(statDef);
         }
     }

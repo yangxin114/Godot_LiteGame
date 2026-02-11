@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://cmbx00idf3g2c"]
+
+[ext_resource type="Script" uid="uid://d3udjbrwxmtgy" path="res://Scripts/Characters/Player/Player.cs" id="1_uti4f"]
+[ext_resource type="SpriteFrames" uid="uid://7s0jc73sen1i" path="res://UI/DefaultPlayerSpriteFrames.tres" id="2_b25j0"]
+[ext_resource type="Resource" uid="uid://dijmkilriapu5" path="res://Data/Player/DefaultPlayer/DefaultPlayer.tres" id="2_toyxa"]
+[ext_resource type="Shape2D" uid="uid://dbxywoy3udhfs" path="res://UI/DefaultPlayerShape.tres" id="3_br8hp"]
+
+[node name="DefaultPlayer" type="CharacterBody2D" unique_id=964290676]
+disable_mode = 2
+collision_layer = 2
+script = ExtResource("1_uti4f")
+PlayerData = ExtResource("2_toyxa")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1488210860]
+sprite_frames = ExtResource("2_b25j0")
+animation = &"walk"
+frame_progress = 0.042517174
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=403976273]
+light_mask = 2
+position = Vector2(-11, 34)
+shape = ExtResource("3_br8hp")

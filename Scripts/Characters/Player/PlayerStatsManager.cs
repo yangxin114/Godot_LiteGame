@@ -14,6 +14,8 @@ namespace Characters
         private Player _player;
         private bool _isInitialized = false;
 
+        public StatContainer statContainer = new ();
+
         /// <summary>
         /// 初始化属性管理器
         /// </summary>
@@ -47,7 +49,7 @@ namespace Characters
             try
             {
                 // 确保Stats容器已正确关联
-                _player.Stats.Owner = _player;
+                statContainer.Owner = _player;
                 
                 // 从PlayerData加载基础属性
                 LoadBaseStatsFromPlayerData();
@@ -82,9 +84,9 @@ namespace Characters
             }
             
             // 确保属性实例存在
-            _player.Stats.EnsureStat(currentHealthDef);
-            _player.Stats.EnsureStat(maxHealthDef);
-            _player.Stats.EnsureStat(moveSpeedDef);
+            _player.GetStatContainer().EnsureStat(currentHealthDef);
+            _player.GetStatContainer().EnsureStat(maxHealthDef);
+            _player.GetStatContainer().EnsureStat(moveSpeedDef);
             
             // 从PlayerData设置初始值（如果有配置的话）
             if (_player.PlayerData != null)
@@ -92,15 +94,15 @@ namespace Characters
                 // 设置生命值
                 if (_player.PlayerData.MaxHealth > 0)
                 {
-                    _player.Stats.SetBase(maxHealthDef, _player.PlayerData.MaxHealth);
-                    _player.Stats.SetBase(currentHealthDef, 
+                    _player.GetStatContainer().SetBase(maxHealthDef, _player.PlayerData.MaxHealth);
+                    _player.GetStatContainer().SetBase(currentHealthDef, 
                         _player.PlayerData.CurrentHealth > 0 ? _player.PlayerData.CurrentHealth : _player.PlayerData.MaxHealth);
                 }
                 
                 // 设置移动速度
                 if (_player.PlayerData.MoveSpeed > 0)
                 {
-                    _player.Stats.SetBase(moveSpeedDef, _player.PlayerData.MoveSpeed);
+                    _player.GetStatContainer().SetBase(moveSpeedDef, _player.PlayerData.MoveSpeed);
                 }
                 
                 Logger2.Info("PlayerStatsManager.LoadBaseStatsFromPlayerData: 从PlayerData加载配置 - Health:{0}/{1}, Speed:{2}", 
@@ -108,12 +110,15 @@ namespace Characters
             }
             else
             {
-                // 使用默认值
-                _player.Stats.SetBase(maxHealthDef, maxHealthDef.DefaultValue);
-                _player.Stats.SetBase(currentHealthDef, maxHealthDef.DefaultValue);
-                _player.Stats.SetBase(moveSpeedDef, moveSpeedDef.DefaultValue);
+                // 使用合理的默认值而不是StatDef的默认值
+                const float DEFAULT_MAX_HEALTH = 100f;
+                const float DEFAULT_MOVE_SPEED = 100f;
                 
-                Logger2.Info("PlayerStatsManager.LoadBaseStatsFromPlayerData: 使用默认属性值初始化");
+                _player.GetStatContainer().SetBase(maxHealthDef, DEFAULT_MAX_HEALTH);
+                _player.GetStatContainer().SetBase(currentHealthDef, DEFAULT_MAX_HEALTH); // 当前生命等于最大生命
+                _player.GetStatContainer().SetBase(moveSpeedDef, DEFAULT_MOVE_SPEED);
+                
+                Logger2.Info("PlayerStatsManager.LoadBaseStatsFromPlayerData: 使用默认属性值初始化 - Health:100/100, Speed:200");
             }
         }
         
@@ -123,11 +128,11 @@ namespace Characters
         private void SetupStatListeners()
         {
             // 监听生命值变化
-            _player.Stats.ValueChanged += OnStatValueChanged;
+            _player.GetStatContainer().ValueChanged += OnStatValueChanged;
             
             // 监听修饰器变化
-            _player.Stats.ModifierAdded += OnModifierAdded;
-            _player.Stats.ModifierRemoved += OnModifierRemoved;
+            _player.GetStatContainer().ModifierAdded += OnModifierAdded;
+            _player.GetStatContainer().ModifierRemoved += OnModifierRemoved;
             
             Logger2.Debug("PlayerStatsManager.SetupStatListeners: 属性监听器设置完成");
         }
@@ -171,11 +176,11 @@ namespace Characters
         {
             // 确保当前生命值不超过最大生命值
             var currentHealthDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.CurrentHealth);
-            var currentHealth = _player.Stats.Get(currentHealthDef);
+            var currentHealth = _player.GetStatContainer().Get(currentHealthDef);
             
             if (currentHealth > newValue)
             {
-                _player.Stats.SetBase(currentHealthDef, newValue);
+                _player.GetStatContainer().SetBase(currentHealthDef, newValue);
             }
             
             // TODO: 更新UI最大血条显示
@@ -205,11 +210,11 @@ namespace Characters
         public override void _ExitTree()
         {
             // 移除事件监听器
-            if (_player?.Stats != null)
+            if (_player?.GetStatContainer() != null)
             {
-                _player.Stats.ValueChanged -= OnStatValueChanged;
-                _player.Stats.ModifierAdded -= OnModifierAdded;
-                _player.Stats.ModifierRemoved -= OnModifierRemoved;
+                _player.GetStatContainer().ValueChanged -= OnStatValueChanged;
+                _player.GetStatContainer().ModifierAdded -= OnModifierAdded;
+                _player.GetStatContainer().ModifierRemoved -= OnModifierRemoved;
             }
             
             Logger2.Info("PlayerStatsManager: 资源清理完成");

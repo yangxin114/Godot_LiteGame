@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using StateMachine;
+using StateMachine.PlayerStates;  // 添加PlayerStates命名空间
 using Logs;
 using Numerical;
 
@@ -9,6 +10,7 @@ namespace Characters
     /// <summary>
     /// 玩家状态管理器
     /// 负责管理玩家的各种状态（闲置、移动、攻击、受伤、死亡等）
+    /// 并与动画系统协同工作
     /// </summary>
     public partial class PlayerStateManager : Node
     {
@@ -22,6 +24,7 @@ namespace Characters
         
         // 状态配置
         [Export] public bool EnableStateLogging { get; set; } = true;
+        [Export] public bool EnableAutoAnimation { get; set; } = true;  // 添加动画自动播放开关
 
         /// <summary>
         /// 初始化状态管理器
@@ -46,27 +49,19 @@ namespace Characters
         }
         
         /// <summary>
-        /// 设置所有状态
+        /// 设置所有状态 - 使用专业的PlayerStates类
         /// </summary>
         private void SetupStates()
         {
-            // 注册各种状态（使用匿名状态实现）
-            _stateMachine.Register("Idle", () => CreateSimpleState("Idle"));
-            _stateMachine.Register("Move", () => CreateSimpleState("Move"));
-            _stateMachine.Register("Attack", () => CreateSimpleState("Attack"));
-            _stateMachine.Register("Hurt", () => CreateSimpleState("Hurt"));
-            _stateMachine.Register("Dead", () => CreateSimpleState("Dead"));
+            // 注册专业的状态实现类
+            _stateMachine.Register("Idle", () => new IdleState(_player));
+            _stateMachine.Register("Move", () => new MoveState(_player));
+            _stateMachine.Register("Attack", () => new AttackState(_player));
+            _stateMachine.Register("Hurt", () => new HurtState(_player));
+            _stateMachine.Register("Dead", () => new DeadState(_player));
             
             // 设置初始状态
             _stateMachine.ChangeState("Idle");
-        }
-        
-        /// <summary>
-        /// 创建简单状态实例
-        /// </summary>
-        private State CreateSimpleState(string name)
-        {
-            return new SimpleState(_player, name);
         }
 
         /// <summary>
@@ -100,6 +95,12 @@ namespace Characters
                 _previousState = _currentState;
                 _currentState = newState;
                 _stateMachine.ChangeState(newState);
+                
+                // 自动触发动画（如果启用）
+                if (EnableAutoAnimation)
+                {
+                    PlayAnimationForState(newState);
+                }
             }
         }
         
@@ -139,7 +140,7 @@ namespace Characters
                 var currentHealthDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.CurrentHealth);
                 if (currentHealthDef != null)
                 {
-                    float health = _player.Stats.Get(currentHealthDef);
+                    float health = _player.GetStatContainer().Get(currentHealthDef);
                     return health <= 0;
                 }
             }
@@ -171,9 +172,8 @@ namespace Characters
         /// </summary>
         private bool ShouldMove()
         {
-            // TODO: 从移动系统获取移动状态
-            // return _player.MovementSystem?.IsMoving() ?? false;
-            return false;
+            // 从移动系统获取移动状态
+            return _player?.MovementSystem?.IsMoving() ?? false;
         }
         
         /// <summary>
@@ -191,6 +191,30 @@ namespace Characters
             _previousState = _currentState;
             _currentState = stateName;
             _stateMachine.ChangeState(stateName);
+            
+            // 自动触发动画（如果启用）
+            if (EnableAutoAnimation)
+            {
+                PlayAnimationForState(stateName);
+            }
+        }
+        
+        /// <summary>
+        /// 根据状态播放对应动画
+        /// </summary>
+        private void PlayAnimationForState(string stateName)
+        {
+            string animationName = stateName.ToLower() switch
+            {
+                "idle" => "idle",
+                "move" => "walk",
+                "attack" => "attack",
+                "hurt" => "hurt",
+                "dead" => "death",
+                _ => "idle"
+            };
+            
+            _player?.AnimationSystem?.PlayAnimation(animationName);
         }
         
         /// <summary>
@@ -222,7 +246,7 @@ namespace Characters
         /// </summary>
         public bool CanTransitionTo(string targetState)
         {
-            // TODO: 实现状态转换规则
+            // 实现状态转换规则
             // 例如：不能从死亡状态转换到其他状态
             if (_currentState == "Dead" && targetState != "Dead")
                 return false;
@@ -261,6 +285,12 @@ namespace Characters
             _previousState = "";
             _stateMachine.ChangeState("Idle");
             
+            // 重置动画
+            if (EnableAutoAnimation)
+            {
+                _player?.AnimationSystem?.PlayAnimation("idle");
+            }
+            
             Logger2.Info("PlayerStateManager: 状态机已重置");
         }
         
@@ -271,34 +301,6 @@ namespace Characters
         {
             _stateMachine = null;
             Logger2.Info("PlayerStateManager: 资源清理完成");
-        }
-    }
-    
-    /// <summary>
-    /// 简单状态实现类
-    /// </summary>
-    public class SimpleState : State
-    {
-        private string _name;
-        
-        public SimpleState(Node owner, string name) : base(owner)
-        {
-            _name = name;
-        }
-        
-        public override void Enter()
-        {
-            Logger2.Debug("SimpleState.Enter: 进入状态 {0}", _name);
-        }
-        
-        public override void Exit()
-        {
-            Logger2.Debug("SimpleState.Exit: 离开状态 {0}", _name);
-        }
-        
-        public override void Update(double delta)
-        {
-            // 简单状态不需要每帧更新逻辑
         }
     }
 }

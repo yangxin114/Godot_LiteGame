@@ -7,12 +7,13 @@ namespace Characters
 {
     /// <summary>
     /// 玩家移动系统
-    /// 负责处理玩家的移动、转向、冲刺等移动相关逻辑
+    /// 负责处理玩家的移动、冲刺等移动相关逻辑
+    /// 针对俯视角2D游戏优化，不包含旋转逻辑
     /// </summary>
     public partial class PlayerMovementSystem : Node
     {
         private Player _player;
-        private Node2D _playerNode;  // 引用用于访问Position和Rotation的Node2D组件
+        private CharacterBody2D _playerCharacterBody2D;  // 引用用于访问Position和Rotation的Node2D组件
         private bool _isInitialized = false;
         
         // 移动状态
@@ -30,6 +31,7 @@ namespace Characters
         // 内部计时器
         private double _dashTimer = 0.0;
         private double _dashCooldownTimer = 0.0;
+        private const float MIN_MOVEMENT_THRESHOLD = 0.1f; // 最小移动阈值
 
         /// <summary>
         /// 初始化移动系统
@@ -45,7 +47,7 @@ namespace Characters
             _player = player ?? throw new ArgumentNullException(nameof(player));
             
             // 查找Player节点的Node2D组件
-            _playerNode = FindNode2DComponent(player);
+            _playerCharacterBody2D = FindCharacterBody2DComponent(player);
             _isInitialized = true;
             
             Logger2.Info("PlayerMovementSystem: 初始化完成");
@@ -65,17 +67,19 @@ namespace Characters
         /// <summary>
         /// 查找Node2D组件
         /// </summary>
-        private Node2D FindNode2DComponent(Node node)
+        private CharacterBody2D FindCharacterBody2DComponent(Node node)
         {
-            // 如果当前节点就是Node2D
-            if (node is Node2D node2D)
+            Logger2.Info("FindCharacterBody2DComponent: node name: {0}, type: {1}", node.Name, node.GetType().Name);
+            // 如果当前节点就是CharacterBody2D
+            if (node is CharacterBody2D node2D)
                 return node2D;
                 
             // 向上查找父节点
             var parent = node.GetParent();
             while (parent != null)
             {
-                if (parent is Node2D parent2D)
+                Logger2.Info("FindCharacterBody2DComponent: parent name: {0}, type: {1}", parent.Name, parent.GetType().Name);
+                if (parent is CharacterBody2D parent2D)
                     return parent2D;
                 parent = parent.GetParent();
             }
@@ -90,11 +94,12 @@ namespace Characters
         /// </summary>
         private void ApplyMovement(double delta)
         {
-            if (_playerNode == null) return;
+            if (_playerCharacterBody2D == null) return;
             
             // 获取移动输入
             Vector2 inputDirection = GetMoveInput();
-            _isMoving = inputDirection != Vector2.Zero;
+            bool wasMoving = _isMoving;
+            _isMoving = inputDirection.Length() > MIN_MOVEMENT_THRESHOLD;
             
             // 计算移动速度
             float speed = CalculateMoveSpeed();
@@ -104,17 +109,45 @@ namespace Characters
             {
                 _velocity = inputDirection * speed;
                 // 更新位置
-                _playerNode.Position += _velocity * (float)delta;
+                // _playerNode.Position += _velocity * (float)delta;
+                _playerCharacterBody2D.MoveAndCollide(_velocity * (float)delta);
                 
-                // 处理转向
-                HandleRotation(inputDirection);
+                // 通知其他系统移动状态变化（用于动画等）
+                if (!wasMoving)
+                {
+                    OnMovementStarted(inputDirection);
+                }
             }
             else
             {
                 // 停止移动时逐渐减速
                 _velocity = _velocity.MoveToward(Vector2.Zero, speed * 5 * (float)delta);
-                _playerNode.Position += _velocity * (float)delta;
+                // _playerNode.Position += _velocity * (float)delta;
+                _playerCharacterBody2D.MoveAndCollide(_velocity * (float)delta);
+                // 通知其他系统移动停止
+                if (wasMoving)
+                {
+                    OnMovementStopped();
+                }
             }
+        }
+        
+        /// <summary>
+        /// 移动开始事件
+        /// </summary>
+        private void OnMovementStarted(Vector2 direction)
+        {
+            // 可以在这里通知动画系统或其他系统
+            Logger2.Debug("PlayerMovementSystem: 开始移动，方向: ({0:F2}, {1:F2})", direction.X, direction.Y);
+        }
+        
+        /// <summary>
+        /// 移动停止事件
+        /// </summary>
+        private void OnMovementStopped()
+        {
+            // 可以在这里通知动画系统或其他系统
+            Logger2.Debug("PlayerMovementSystem: 停止移动");
         }
         
         /// <summary>
@@ -122,9 +155,25 @@ namespace Characters
         /// </summary>
         private Vector2 GetMoveInput()
         {
-            // TODO: 从PlayerInputHandler获取输入
-            // 暂时返回零向量，实际应该从输入系统获取
-            return Vector2.Zero;
+            // 从PlayerInputHandler获取输入方向
+            if (_player?.InputHandler != null)
+            {
+                return _player.InputHandler.MoveDirection;
+            }
+            
+            // 如果没有输入处理器，使用键盘输入作为后备方案
+            Vector2 direction = Vector2.Zero;
+            
+            if (Input.IsKeyPressed(Key.A) || Input.IsKeyPressed(Key.Left))
+                direction.X -= 1;
+            if (Input.IsKeyPressed(Key.D) || Input.IsKeyPressed(Key.Right))
+                direction.X += 1;
+            if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up))
+                direction.Y -= 1;
+            if (Input.IsKeyPressed(Key.S) || Input.IsKeyPressed(Key.Down))
+                direction.Y += 1;
+                
+            return direction.Normalized();
         }
         
         /// <summary>
@@ -140,13 +189,15 @@ namespace Characters
                 var moveSpeedDef = StatDefDataLoader.Instance.GetStatDefById(StatDefDataLoader.MoveSpeed);
                 if (moveSpeedDef != null)
                 {
-                    speed += _player.Stats.Get(moveSpeedDef);
+                    speed += _player.GetStatContainer().Get(moveSpeedDef);
                 }
             }
             
             // 应用奔跑倍数
-            // TODO: 检查是否正在奔跑
-            // if (isRunning) speed *= RunMultiplier;
+            if (_player?.InputHandler?.IsRunning ?? false)
+            {
+                speed *= RunMultiplier;
+            }
             
             // 应用冲刺速度
             if (_isDashing)
@@ -158,26 +209,11 @@ namespace Characters
         }
         
         /// <summary>
-        /// 处理角色转向
-        /// </summary>
-        private void HandleRotation(Vector2 direction)
-        {
-            if (direction == Vector2.Zero || _playerNode == null) return;
-            
-            // 计算目标角度
-            float targetAngle = direction.Angle();
-            
-            // 平滑转向到目标角度
-            // TODO: 实现平滑转向逻辑
-            _playerNode.Rotation = targetAngle;
-        }
-        
-        /// <summary>
         /// 执行冲刺
         /// </summary>
         public void PerformDash(Vector2 direction)
         {
-            if (!_isInitialized || _isDashing || _dashCooldownTimer > 0 || _playerNode == null)
+            if (!_isInitialized || _isDashing || _dashCooldownTimer > 0 || _playerCharacterBody2D == null)
                 return;
                 
             if (direction == Vector2.Zero)
@@ -263,6 +299,14 @@ namespace Characters
         public Vector2 GetVelocity()
         {
             return _velocity;
+        }
+        
+        /// <summary>
+        /// 获取当前移动方向
+        /// </summary>
+        public Vector2 GetCurrentMovement()
+        {
+            return _isMoving ? _velocity.Normalized() : Vector2.Zero;
         }
         
         /// <summary>

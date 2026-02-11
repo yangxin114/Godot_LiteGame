@@ -9,8 +9,8 @@ namespace Numerical
     /// </summary>
     public class StatContext
     {
-        public StatOwner Source;
-        public StatOwner Target;
+        public IStatOwner Source;
+        public IStatOwner Target;
 
         public HashSet<ContextTag> Tags = new();
     }
