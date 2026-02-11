@@ -22,6 +22,7 @@ namespace Attributes
     /// ⚠️ ModifierDef 本身不生效，
     /// 必须实例化成 ModifierInstance
     /// </summary>
+    [GlobalClass]
     public partial class ModifierDef : Resource
     {
         /// <summary>
@@ -30,24 +31,24 @@ namespace Attributes
         [Export] public AttributeDef Target;
 
         /// <summary>
-    /// 运算方式
+        /// 运算方式
         /// </summary>
-    [Export] public ModifierOp Operation;
+        [Export] public ModifierOp Operation;
 
         /// <summary>
-    /// 所属计算阶段
+        /// 所属计算阶段
         /// </summary>
-    [Export] public ModifierPhase Phase;
+        [Export] public ModifierPhase Phase;
 
         /// <summary>
-    /// 修正值（百分比用 0.2 表示 20%）
-    /// </summary>
-    [Export] public float Value;
+        /// 修正值（百分比用 0.2 表示 20%）
+        /// </summary>
+        [Export] public float Value;
 
         /// <summary>
-    /// 是否需要上下文条件
-    /// </summary>
-    [Export] public bool UseContext;
+        /// 是否需要上下文条件
+        /// </summary>
+        [Export] public bool UseContext;
 
         /// <summary>
         /// 需要的上下文标签
@@ -69,7 +70,7 @@ namespace Attributes
         /// </summary>
         [Export] public int Priority = 0;
     }
-    
+
     /// <summary>
     /// Modifier 的堆叠/唯一性规则
     /// </summary>

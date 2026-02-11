@@ -15,6 +15,7 @@ namespace Attributes
     /// AttributeDef 永远是“静态的”，
     /// 不存角色状态、不存运行时数值。
     /// </summary>
+    [GlobalClass]
     public partial class AttributeDef : Resource
     {
         /// <summary>
@@ -23,24 +24,24 @@ namespace Attributes
         [Export] public string Id;
 
         /// <summary>
-    /// 显示用名称（UI / Debug）
-    /// </summary>
-    [Export] public string DisplayName;
+        /// 显示用名称（UI / Debug）
+        /// </summary>
+        [Export] public string DisplayName;
 
         /// <summary>
-    /// 属性分类（仅用于组织和 UI）
-    /// </summary>
-    [Export] public AttributeCategory Category;
+        /// 属性分类（仅用于组织和 UI）
+        /// </summary>
+        [Export] public AttributeCategory Category;
 
         /// <summary>
-    /// 默认基础值
-    /// </summary>
-    [Export] public float DefaultValue;
+        /// 默认基础值
+        /// </summary>
+        [Export] public float DefaultValue;
 
         /// <summary>
-    /// 是否是派生属性（由公式计算）
-    /// </summary>
-    [Export] public bool IsDerived;
+        /// 是否是派生属性（由公式计算）
+        /// </summary>
+        [Export] public bool IsDerived;
 
         /// <summary>
         /// 是否启用最终数值 Clamp

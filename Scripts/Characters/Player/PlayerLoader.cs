@@ -42,9 +42,9 @@ namespace Characters
                             try
                             {
                                 var text = File.ReadAllText(f);
-                                var pd = PlayerData.FromJson(text);
-                                if (pd != null && !string.IsNullOrEmpty(pd.Name))
-                                    dict[pd.Name] = pd;
+                                // var pd = PlayerData.FromJson(text);
+                                // if (pd != null && !string.IsNullOrEmpty(pd.Name))
+                                //     dict[pd.Name] = pd;
                             }
                             catch (Exception e)
                             {
@@ -75,9 +75,9 @@ namespace Characters
                         try
                         {
                             var text = File.ReadAllText(f);
-                            var pd = PlayerData.FromJson(text);
-                            if (pd != null && !string.IsNullOrEmpty(pd.Name))
-                                dict[pd.Name] = pd; // user overrides builtin
+                            // var pd = PlayerData.FromJson(text);
+                            // if (pd != null && !string.IsNullOrEmpty(pd.Name))
+                            //     dict[pd.Name] = pd; // user overrides builtin
                         }
                         catch (Exception e)
                         {

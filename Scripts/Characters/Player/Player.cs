@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Linq;
 using Characters;
+using Attributes;
 
 /*
  * Player.cs
@@ -14,13 +15,8 @@ using Characters;
  * 说明：该文件仅负责加载和实例化玩家；玩家的行为、状态机、渲染等逻辑
  * 在 `Characters.BasePlayer` 与 `PlayerStateMachine` 中实现。
  */
-public partial class Player : Node2D
+public partial class Player : AttributesOwner
 {
-
-	/// <summary>
-	/// 运行时的玩家实例（由 PlayerFactory 创建的 BasePlayer 或派生类）。
-	/// </summary>
-	private Characters.BasePlayer runtimePlayer;
 
 	/// <summary>
 	/// 节点进入场景树时被调用：尝试从 workshop 加载玩家定义并实例化一个运行时玩家。
@@ -33,22 +29,13 @@ public partial class Player : Node2D
 
 		if (players != null && players.Count > 0)
 			chosen = players[0];
-
-		// 若没有可用的自定义玩家，则使用内置默认数据
-		if (chosen == null)
-			chosen = PlayerData.Default();
-
-		// 使用工厂创建运行时玩家并将其加入场景
-		runtimePlayer = Characters.PlayerFactory.Create(this, chosen);
-		AddChild(runtimePlayer);
-		runtimePlayer.Name = chosen.Name ?? "Player";
 	}
 
 	/// <summary>
 	/// 每帧调用，将更新转发给运行时玩家（如果存在）。
 	/// </summary>
 	public override void _Process(double delta)
-	{
-		runtimePlayer?.Process(delta);
-	}
+    {
+        
+    }
 }
