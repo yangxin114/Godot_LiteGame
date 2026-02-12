@@ -1,164 +1,105 @@
 using Godot;
-using Logs;
 using System;
 
 /// <summary>
-/// 高级相机跟随系统，带平滑跟随和边界限制
+/// Godot 4.6 兼容的相机跟随系统
+/// - 使用 Position 而非 GlobalPosition
+/// - 关闭内置 Smoothing
+/// - 使用 MakeCurrent()
+/// - 正确使用世界 Limit
 /// </summary>
 public partial class CameraFollow : Camera2D
 {
     [Export] private Node2D _target;
-    [Export] private float _followSmoothness = 0.1f;
-    [Export] private Vector2 _offset = Vector2.Zero;  // 相机相对于目标的偏移
 
-    // 边界设置 - 这些是世界坐标中的边界
-    [Export] private float _leftBoundary = 0f;
-    [Export] private float _rightBoundary = 100f;
-    [Export] private float _topBoundary = 0f;
-    [Export] private float _bottomBoundary = 100f;
+    /// <summary>
+    /// 平滑速度（推荐 4~8）
+    /// </summary>
+    [Export] private float _followSpeed = 6f;
 
-    // 是否启用平滑跟随
-    [Export] private bool _smoothFollowEnabled = true;
+    [Export] private Vector2 _offset = Vector2.Zero;
 
-    // 是否启用边界限制
-    [Export] private bool _boundaryLimitEnabled = true;
+    [Export] private bool _enableSmooth = true;
+
+    [ExportGroup("World Boundary")]
+    [Export] private int _limitLeft = -2000;
+    [Export] private int _limitRight = 2000;
+    [Export] private int _limitTop = -2000;
+    [Export] private int _limitBottom = 2000;
 
     public override void _Ready()
     {
-        base._Ready();
+        // 确保成为当前相机（Godot 4 推荐）
+        MakeCurrent();
 
-        if (_target == null)
-        {
-            GD.PrintErr("Camera target is not set!");
-            return;
-        }
+        // 关闭 Godot 自带平滑，避免双重平滑
+        PositionSmoothingEnabled = false;
 
-        // 立即将相机定位到玩家中心位置
+        ApplyBoundary();
+
         TeleportToTarget();
-        
-        // 设置相机的内置边界（仅用于启用 Godot 的内置边界系统）
-        UpdateCameraLimits();
     }
 
-    public override void _PhysicsProcess(double delta)
+    public override void _Process(double delta)
     {
-        if (_target == null) return;
+        if (_target == null)
+            return;
 
-        // 计算期望的相机位置
-        Vector2 desiredPosition = _target.GlobalPosition + _offset;
+        Vector2 desired = _target.GlobalPosition + _offset;
 
-        // 如果启用边界限制，则限制位置
-        if (_boundaryLimitEnabled)
+        if (_enableSmooth)
         {
-            //desiredPosition = ConstrainToBounds(desiredPosition);
-        }
-
-        // 根据是否启用平滑跟随决定如何移动相机
-        if (_smoothFollowEnabled)
-        {
-            // 平滑跟随
-            GlobalPosition = GlobalPosition.Lerp(desiredPosition, _followSmoothness);
+            // 指数平滑（帧率无关）
+            float t = 1f - Mathf.Exp(-_followSpeed * (float)delta);
+            Position = Position.Lerp(desired, t);
         }
         else
         {
-            // 瞬时跟随
-            GlobalPosition = desiredPosition;
-        }
-		Logger2.Info( "Camera Position: {0}", GlobalPosition );
-		Logger2.Info( "Camera Target Position: {0}", _target.GlobalPosition );
-    }
-
-    /// <summary>
-    /// 将位置限制在边界内
-    /// </summary>
-    private Vector2 ConstrainToBounds(Vector2 position)
-    {
-        // 直接使用我们定义的世界坐标边界
-        return new Vector2(
-            Mathf.Clamp(position.X, _leftBoundary, _rightBoundary),
-            Mathf.Clamp(position.Y, _topBoundary, _bottomBoundary)
-        );
-    }
-
-    /// <summary>
-    /// 更新相机的内置边界限制（用于 Godot 的内置边界系统）
-    /// </summary>
-    private void UpdateCameraLimits()
-    {
-        // 设置 Godot 的内置边界（像素单位），这些值会在相机移动时起作用
-        // 注意：这些是相对当前相机位置的偏移，不是世界坐标
-        LimitLeft = (int)(_leftBoundary - GlobalPosition.X);
-        LimitRight = (int)(_rightBoundary - GlobalPosition.X);
-        LimitTop = (int)(_topBoundary - GlobalPosition.Y);
-        LimitBottom = (int)(_bottomBoundary - GlobalPosition.Y);
-    }
-
-    /// <summary>
-    /// 动态设置边界
-    /// </summary>
-    public void SetBoundaries(float left, float right, float top, float bottom)
-    {
-        _leftBoundary = left;
-        _rightBoundary = right;
-        _topBoundary = top;
-        _bottomBoundary = bottom;
-
-        // 如果相机已经存在，更新其限制
-        if (IsInsideTree())
-        {
-            UpdateCameraLimits();
+            Position = desired;
         }
     }
 
     /// <summary>
-    /// 设置跟随目标
+    /// 设置世界边界
+    /// </summary>
+    private void ApplyBoundary()
+    {
+        LimitLeft = _limitLeft;
+        LimitRight = _limitRight;
+        LimitTop = _limitTop;
+        LimitBottom = _limitBottom;
+    }
+
+    /// <summary>
+    /// 外部动态修改边界
+    /// </summary>
+    public void SetBoundary(int left, int right, int top, int bottom)
+    {
+        _limitLeft = left;
+        _limitRight = right;
+        _limitTop = top;
+        _limitBottom = bottom;
+
+        ApplyBoundary();
+    }
+
+    /// <summary>
+    /// 设置目标
     /// </summary>
     public void SetTarget(Node2D target)
     {
         _target = target;
+        TeleportToTarget();
     }
 
     /// <summary>
-    /// 设置相机偏移
-    /// </summary>
-    public void SetOffset(Vector2 offset)
-    {
-        _offset = offset;
-    }
-
-    /// <summary>
-    /// 立即移动到目标位置
+    /// 立即移动到目标
     /// </summary>
     public void TeleportToTarget()
     {
-        if (_target != null)
-        {
-            Vector2 targetPos = _target.GlobalPosition + _offset;
+        if (_target == null)
+            return;
 
-            if (_boundaryLimitEnabled)
-            {
-                targetPos = ConstrainToBounds(targetPos);
-            }
-
-            GlobalPosition = targetPos;
-            
-            // 更新内置边界
-            UpdateCameraLimits();
-        }
-    }
-    
-    /// <summary>
-    /// 当相机位置改变时更新边界限制
-    /// </summary>
-    public override void _Notification(int what)
-    {
-        if (what == NotificationTransformChanged)
-        {
-            // 如果启用了边界限制，更新 Godot 内置边界
-            if (_boundaryLimitEnabled && IsInsideTree())
-            {
-                UpdateCameraLimits();
-            }
-        }
+        Position = _target.GlobalPosition + _offset;
     }
 }

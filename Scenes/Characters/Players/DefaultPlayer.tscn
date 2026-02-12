@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d3udjbrwxmtgy" path="res://Scripts/Characters/Player/Player.cs" id="1_uti4f"]
 [ext_resource type="SpriteFrames" uid="uid://7s0jc73sen1i" path="res://UI/DefaultPlayerSpriteFrames.tres" id="2_b25j0"]
-[ext_resource type="Resource" uid="uid://dijmkilriapu5" path="res://Data/Player/DefaultPlayer/DefaultPlayer.tres" id="2_toyxa"]
+[ext_resource type="Resource" uid="uid://dijmkilriapu5" path="res://Data/DefaultPlayer.tres" id="2_toyxa"]
 [ext_resource type="Shape2D" uid="uid://dbxywoy3udhfs" path="res://UI/DefaultPlayerShape.tres" id="3_br8hp"]
 
 [node name="DefaultPlayer" type="CharacterBody2D" unique_id=964290676]

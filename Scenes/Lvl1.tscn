@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bsyb2sfds4rgd" path="res://Asserts/Map/tower-defense-2d-vector-tileset/TAILS/PNG/tail_4/36.png" id="3_ywfrw"]
 [ext_resource type="Texture2D" uid="uid://dwu44jv5vg5ba" path="res://Asserts/Map/tower-defense-2d-vector-tileset/TAILS/PNG/tail_4/34.png" id="4_k7aja"]
 [ext_resource type="Texture2D" uid="uid://ccvc3k77cees8" path="res://Asserts/Map/tower-defense-2d-vector-tileset/TAILS/PNG/tail_4/13.png" id="4_ywfrw"]
-[ext_resource type="Script" uid="uid://d4ji8qy12l670" path="res://Scenes/CameraFollow.cs" id="5_k7aja"]
+[ext_resource type="Script" uid="uid://bw2hosedqhq70" path="res://Scenes/CameraFollow.cs" id="5_k7aja"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k7aja"]
 texture = ExtResource("4_ywfrw")
@@ -485,6 +485,7 @@ size = Vector2(25, 1100.5)
 [node name="Lvl1" type="Node2D" unique_id=728493407]
 
 [node name="Map" type="Node2D" parent="." unique_id=472984026]
+position = Vector2(-960, -540)
 
 [node name="Layer1" type="TileMapLayer" parent="Map" unique_id=1396803827]
 use_parent_material = true
@@ -548,10 +549,13 @@ shape = SubResource("RectangleShape2D_k7aja")
 
 [node name="DefaultPlayer" parent="." unique_id=802308749 instance=ExtResource("1_wkiis")]
 light_mask = 2
-position = Vector2(812, 413)
+scale = Vector2(1, 0.9)
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1614048151 node_paths=PackedStringArray("_target")]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1611272657 node_paths=PackedStringArray("_target")]
+zoom = Vector2(2, 2)
 script = ExtResource("5_k7aja")
 _target = NodePath("../DefaultPlayer")
-_rightBoundary = 1000.0
-_bottomBoundary = 1000.0
+_limitLeft = -980
+_limitRight = 980
+_limitTop = -540
+_limitBottom = 540
