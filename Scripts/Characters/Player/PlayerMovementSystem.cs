@@ -108,9 +108,10 @@ namespace Characters
             if (_isMoving)
             {
                 _velocity = inputDirection * speed;
+                _playerCharacterBody2D.Velocity = _velocity;
                 // 更新位置
                 // _playerNode.Position += _velocity * (float)delta;
-                _playerCharacterBody2D.MoveAndCollide(_velocity * (float)delta);
+                _playerCharacterBody2D.MoveAndSlide();
                 
                 // 通知其他系统移动状态变化（用于动画等）
                 if (!wasMoving)
@@ -123,7 +124,10 @@ namespace Characters
                 // 停止移动时逐渐减速
                 _velocity = _velocity.MoveToward(Vector2.Zero, speed * 5 * (float)delta);
                 // _playerNode.Position += _velocity * (float)delta;
-                _playerCharacterBody2D.MoveAndCollide(_velocity * (float)delta);
+                _playerCharacterBody2D.Velocity = _velocity;
+
+                // _playerCharacterBody2D.MoveAndCollide(_velocity * (float)delta);
+                _playerCharacterBody2D.MoveAndSlide();
                 // 通知其他系统移动停止
                 if (wasMoving)
                 {

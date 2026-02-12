@@ -123,9 +123,9 @@ namespace Characters
 		}
 
 		public StatContainer GetStatContainer()
-        {
-            return _statsManager.statContainer;
-        }
+		{
+			return _statsManager.statContainer;
+		}
 
 		/// <summary>
 		/// 每帧更新
@@ -144,9 +144,6 @@ namespace Characters
 			// 更新战斗系统
 			_combatSystem?.Update(delta);
 			
-			// 更新移动系统
-			_movementSystem?.Update(delta);
-			
 			// 更新状态管理器
 			_stateManager?.Update(delta);
 			
@@ -159,6 +156,7 @@ namespace Characters
 				_combatSystem?.PerformAttack();
 			}
 		}
+
 		
 		/// <summary>
 		/// 更新动画系统
@@ -179,7 +177,8 @@ namespace Characters
 		/// </summary>
 		public override void _PhysicsProcess(double delta)
 		{
-			// 物理相关的更新逻辑
+			// 更新移动系统
+			_movementSystem?.Update(delta);
 		}
 		
 		/// <summary>
@@ -194,8 +193,8 @@ namespace Characters
 			Logger2.Info("Player: 资源清理完成");
 		}
 
-        // 公共属性访问器
-        public PlayerStatsManager StatsManager => _statsManager;
+		// 公共属性访问器
+		public PlayerStatsManager StatsManager => _statsManager;
 		public PlayerInputHandler InputHandler => _inputHandler;
 		public PlayerCombatSystem CombatSystem => _combatSystem;
 		public PlayerMovementSystem MovementSystem => _movementSystem;

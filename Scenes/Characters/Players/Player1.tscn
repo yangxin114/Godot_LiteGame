@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://cmbx00idf3g2c"]
 
 [ext_resource type="Texture2D" uid="uid://bmk3ma83ojpwx" path="res://Asserts/Players/Lightning Mage/Attack_1.png" id="1_1rrr1"]
+[ext_resource type="Script" uid="uid://d3udjbrwxmtgy" path="res://Scripts/Characters/Player/Player.cs" id="1_mfcch"]
+[ext_resource type="Resource" uid="uid://dijmkilriapu5" path="res://Data/Player/DefaultPlayer/DefaultPlayer.tres" id="2_35swi"]
 [ext_resource type="Texture2D" uid="uid://cys40ef7rf4l" path="res://Asserts/Players/Lightning Mage/Attack_2.png" id="2_mfcch"]
 [ext_resource type="Texture2D" uid="uid://n7c1ennab7pd" path="res://Asserts/Players/Lightning Mage/Dead.png" id="3_35swi"]
 [ext_resource type="Texture2D" uid="uid://d3u2dknsq1p30" path="res://Asserts/Players/Lightning Mage/Hurt.png" id="4_7p0ky"]
@@ -358,7 +360,10 @@ animations = [{
 radius = 15.0
 height = 66.0
 
-[node name="Player1" type="Area2D" unique_id=1761922380]
+[node name="Player1" type="CharacterBody2D" unique_id=687935828]
+collision_layer = 2
+script = ExtResource("1_mfcch")
+PlayerData = ExtResource("2_35swi")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1488210860]
 sprite_frames = SubResource("SpriteFrames_4pqec")
