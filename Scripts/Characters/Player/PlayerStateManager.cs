@@ -27,6 +27,11 @@ namespace Characters
         [Export] public bool EnableAutoAnimation { get; set; } = true;  // 添加动画自动播放开关
 
         /// <summary>
+        /// 状态机引用（供外部访问）
+        /// </summary>
+        public StateMachine.StateMachine StateMachine => _stateMachine;
+
+        /// <summary>
         /// 初始化状态管理器
         /// </summary>
         public void Initialize(Player player)
@@ -173,7 +178,7 @@ namespace Characters
         private bool ShouldMove()
         {
             // 从移动系统获取移动状态
-            return _player?.MovementSystem?.IsMoving() ?? false;
+            return _player?.MovementComponent?.IsMoving ?? false;
         }
         
         /// <summary>
@@ -214,7 +219,7 @@ namespace Characters
                 _ => "idle"
             };
             
-            _player?.AnimationSystem?.PlayAnimation(animationName);
+            _player?.AnimationComponent?.Play(animationName);
         }
         
         /// <summary>
@@ -288,7 +293,7 @@ namespace Characters
             // 重置动画
             if (EnableAutoAnimation)
             {
-                _player?.AnimationSystem?.PlayAnimation("idle");
+                _player?.AnimationComponent?.Play("idle");
             }
             
             Logger2.Info("PlayerStateManager: 状态机已重置");

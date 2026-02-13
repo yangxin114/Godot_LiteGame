@@ -3,6 +3,7 @@ using System;
 using StateMachine;
 using Characters;
 using Logs;
+using Components;
 
 namespace StateMachine.PlayerStates
 {
@@ -26,9 +27,9 @@ namespace StateMachine.PlayerStates
             Logger2.Debug("IdleState.Enter: 进入空闲状态");
             
             // 播放空闲动画
-            if (_player?.AnimationSystem != null)
+            if (_player?.AnimationComponent != null)
             {
-                _player.AnimationSystem.PlayAnimation("idle");
+                _player.AnimationComponent.Play("idle");
             }
             
             // 重置计时器
@@ -59,16 +60,16 @@ namespace StateMachine.PlayerStates
         private void CheckStateTransitions()
         {
             // 检查移动输入
-            if (_player?.InputHandler?.IsMoving() == true)
+            if (_player?.InputComponent?.IsMoving == true)
             {
-                _player.SetState("Move");
+                GetStateMachine()?.ChangeState("Move");
                 return;
             }
             
             // 检查攻击输入
-            if (_player?.InputHandler?.IsAttacking == true)
+            if (_player?.InputComponent?.IsAttacking == true)
             {
-                _player.SetState("Attack");
+                GetStateMachine()?.ChangeState("Attack");
                 return;
             }
             
@@ -79,6 +80,14 @@ namespace StateMachine.PlayerStates
         public override void Exit()
         {
             Logger2.Debug("IdleState.Exit: 离开空闲状态");
+        }
+
+        /// <summary>
+        /// 获取状态机引用
+        /// </summary>
+        private StateMachine GetStateMachine()
+        {
+            return _player?.StateManager?.StateMachine;
         }
     }
 }
