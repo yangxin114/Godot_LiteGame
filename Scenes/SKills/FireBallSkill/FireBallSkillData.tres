@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SkillData" format=3 uid="uid://dk7ew5420obo0"]
+
+[ext_resource type="Script" uid="uid://dwvr77r1747ts" path="res://Scripts/Skills/SkillData.cs" id="1_8qb4i"]
+
+[sub_resource type="CSharpScript" id="CSharpScript_8qb4i"]
+
+[resource]
+script = ExtResource("1_8qb4i")
+SkillId = "FireBallSkill"
+SkillName = "火球术"
+Description = "释放一个火球对敌人造成伤害。"
+ManaCost = 5.0
+RequireTarget = true
+BaseDamage = 15.0
+DamageType = 1
+metadata/_custom_type_script = "uid://dwvr77r1747ts"

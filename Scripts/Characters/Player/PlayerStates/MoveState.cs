@@ -83,11 +83,11 @@ namespace StateMachine.PlayerStates
                 // 水平移动为主
                 if (direction.X > 0)
                 {
-                    _player.AnimationComponent.SetSpriteFlipH(false); // 向右
+                    _player.AnimationComponent.SetFlipH(false); // 向右
                 }
                 else
                 {
-                    _player.AnimationComponent.SetSpriteFlipH(true); // 向左
+                    _player.AnimationComponent.SetFlipH(true); // 向左
                 }
             }
             // 垂直移动的处理可以根据需要添加

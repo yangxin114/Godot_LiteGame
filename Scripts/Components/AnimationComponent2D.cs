@@ -631,29 +631,59 @@ namespace Components
         /// <summary>
         /// 设置精灵水平翻转
         /// </summary>
-        public void SetSpriteFlipH(bool flip)
+        public void SetFlipH(bool flip)
         {
-            if (_sprite != null)
+            // 根据系统类型获取对应节点
+            switch (SystemType)
             {
-                _sprite.FlipH = flip;
+                case AnimationSystemType.AnimationPlayer:
+                    break;
+
+                case AnimationSystemType.AnimatedSprite:
+                    if (_animatedSprite != null)
+                    {
+                        _animatedSprite.FlipH = flip;
+                    }
+                    break;
+                case AnimationSystemType.Sprite:
+                    if (_sprite != null)
+                    {
+                        _sprite.FlipH = flip;
+                    }
+                    break;
             }
         }
 
         /// <summary>
         /// 设置精灵垂直翻转
         /// </summary>
-        public void SetSpriteFlipV(bool flip)
+        public void SetFlipV(bool flip)
         {
-            if (_sprite != null)
+            // 根据系统类型获取对应节点
+            switch (SystemType)
             {
-                _sprite.FlipV = flip;
+                case AnimationSystemType.AnimationPlayer:
+                    break;
+
+                case AnimationSystemType.AnimatedSprite:
+                    if (_animatedSprite != null)
+                    {
+                        _animatedSprite.FlipV = flip;
+                    }
+                    break;
+                case AnimationSystemType.Sprite:
+                    if (_sprite != null)
+                    {
+                        _sprite.FlipV = flip;
+                    }
+                    break;
             }
         }
 
         /// <summary>
         /// 切换精灵水平翻转
         /// </summary>
-        public void ToggleSpriteFlipH()
+        public void ToggleFlipH()
         {
             if (_sprite != null)
             {
@@ -787,7 +817,13 @@ namespace Components
         /// <summary>
         /// 使用AnimatedSprite2D
         /// </summary>
-        AnimatedSprite
+        AnimatedSprite,
+
+        /// <summary>
+        /// 使用Sprite2D（仅支持翻转，不支持动画）
+        /// </summary>
+        /// 注意：如果使用此类型，必须手动控制Sprite的帧切换和翻转
+        Sprite
     }
 
     #endregion

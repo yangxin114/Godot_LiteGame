@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://pv4e3faibs8u"]
+
+[ext_resource type="Script" uid="uid://cpptfyl8jbscf" path="res://Scripts/Skills/BaseSkill.cs" id="1_amu87"]
+
+[node name="BaseSkill" type="Node2D" unique_id=1102105966]
+script = ExtResource("1_amu87")

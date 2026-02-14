@@ -134,18 +134,26 @@ namespace Components
         public override void Initialize(CharacterEntity entity)
         {
             base.Initialize(entity);
-            Logger2.Info("InputHandlerComponent: 组件初始化完成");
+            Logger2.Info($"InputHandlerComponent: 组件初始化完成 - Entity: {entity?.Name ?? "null"}");
         }
 
         public override void Start()
         {
             base.Start();
             Logger2.Info("InputHandlerComponent: 组件启动完成");
+            LogCurrentConfiguration();
         }
 
         public override void Update(float delta)
         {
-            if (!IsEnabled || !InputEnabled) return;
+            if (!IsEnabled || !InputEnabled) 
+            {
+                if (!IsEnabled)
+                    Logger2.Debug("InputHandlerComponent: 组件被禁用，跳过更新");
+                if (!InputEnabled)
+                    Logger2.Debug("InputHandlerComponent: 输入处理被禁用，跳过更新");
+                return;
+            }
 
             ProcessMovementInput();
             ProcessActionInput();
@@ -153,6 +161,7 @@ namespace Components
 
         public override void Cleanup()
         {
+            Logger2.Info("InputHandlerComponent: 开始清理组件");
             ResetInputs();
             base.Cleanup();
             Logger2.Info("InputHandlerComponent: 组件清理完成");
@@ -185,11 +194,21 @@ namespace Components
             // 检查移动方向是否发生变化
             bool directionChanged = newDirection != MoveDirection;
 
+            // 记录输入状态变化
+            if (directionChanged)
+            {
+                Logger2.Debug($"InputHandlerComponent: 移动方向改变 - 从 {MoveDirection} 到 {newDirection}");
+            }
+
             // 更新移动方向
             if (newDirection != Vector2.Zero)
             {
                 MoveDirection = newDirection;
                 LastMoveDirection = newDirection;
+                if (directionChanged)
+                {
+                    Logger2.Debug($"InputHandlerComponent: 更新移动方向 - 当前: {MoveDirection}, 最后: {LastMoveDirection}");
+                }
             }
             else
             {
@@ -199,6 +218,7 @@ namespace Components
             // 触发方向改变事件
             if (directionChanged)
             {
+                Logger2.Debug($"InputHandlerComponent: 触发OnMoveDirectionChanged事件 - 方向: {MoveDirection}");
                 OnMoveDirectionChanged?.Invoke(MoveDirection);
             }
 
@@ -207,6 +227,7 @@ namespace Components
             IsRunning = Input.IsActionPressed(RunAction);
             if (wasRunning != IsRunning)
             {
+                Logger2.Debug($"InputHandlerComponent: 奔跑状态改变 - 从 {wasRunning} 到 {IsRunning}");
                 OnRunStateChanged?.Invoke(IsRunning);
             }
 
@@ -214,6 +235,7 @@ namespace Components
             if (Input.IsActionJustPressed(DashAction))
             {
                 IsDashing = true;
+                Logger2.Debug($"InputHandlerComponent: 冲刺输入触发 - 方向: {LastMoveDirection}");
                 OnDashPressed?.Invoke(LastMoveDirection);
             }
             else
@@ -231,6 +253,7 @@ namespace Components
             if (Input.IsActionJustPressed(AttackAction))
             {
                 IsAttacking = true;
+                Logger2.Debug("InputHandlerComponent: 攻击输入触发");
                 OnAttackPressed?.Invoke();
             }
             else
@@ -242,6 +265,7 @@ namespace Components
             if (Input.IsActionJustPressed(JumpAction))
             {
                 IsJumping = true;
+                Logger2.Debug("InputHandlerComponent: 跳跃输入触发");
                 OnJumpPressed?.Invoke();
             }
             else
@@ -259,7 +283,9 @@ namespace Components
         /// </summary>
         public float GetMoveAngle()
         {
-            return LastMoveDirection.Angle();
+            float angle = LastMoveDirection.Angle();
+            Logger2.Debug($"InputHandlerComponent: 获取移动角度 - 方向: {LastMoveDirection}, 角度: {angle} rad");
+            return angle;
         }
 
         /// <summary>
@@ -268,12 +294,17 @@ namespace Components
         public int GetDirectionIndex()
         {
             if (LastMoveDirection == Vector2.Zero)
+            {
+                Logger2.Debug("InputHandlerComponent: 获取方向索引 - 无移动方向，默认返回0");
                 return 0; // 默认向右
+            }
 
             float angle = LastMoveDirection.Angle();
             if (angle < 0) angle += 2 * Mathf.Pi;
 
-            return Mathf.RoundToInt(angle / (2 * Mathf.Pi / 8)) % 8;
+            int index = Mathf.RoundToInt(angle / (2 * Mathf.Pi / 8)) % 8;
+            Logger2.Debug($"InputHandlerComponent: 获取方向索引 - 方向: {LastMoveDirection}, 角度: {angle:F3} rad, 索引: {index}");
+            return index;
         }
 
         /// <summary>
@@ -283,8 +314,12 @@ namespace Components
         {
             if (Entity != null)
             {
-                return (targetPoint - Entity.GlobalPosition).Normalized();
+                Vector2 direction = (targetPoint - Entity.GlobalPosition).Normalized();
+                Logger2.Debug($"InputHandlerComponent: 计算指向点的方向 - 当前位置: {Entity.GlobalPosition}, 目标点: {targetPoint}, 方向: {direction}");
+                return direction;
             }
+            
+            Logger2.Warn("InputHandlerComponent: 无法计算指向点方向 - Entity为空");
             return Vector2.Zero;
         }
 
@@ -293,11 +328,15 @@ namespace Components
         /// </summary>
         public void ResetInputs()
         {
+            Logger2.Debug($"InputHandlerComponent: 重置所有输入状态 - 之前状态: MoveDir={MoveDirection}, Attacking={IsAttacking}, Running={IsRunning}, Jumping={IsJumping}, Dashing={IsDashing}");
+            
             MoveDirection = Vector2.Zero;
             IsAttacking = false;
             IsRunning = false;
             IsJumping = false;
             IsDashing = false;
+            
+            Logger2.Debug("InputHandlerComponent: 输入状态重置完成");
         }
 
         /// <summary>
@@ -306,11 +345,15 @@ namespace Components
         public void SetMoveDirection(Vector2 direction)
         {
             Vector2 normalizedDirection = direction.Normalized();
+            Vector2 oldDirection = MoveDirection;
+            
             MoveDirection = normalizedDirection;
             if (normalizedDirection != Vector2.Zero)
             {
                 LastMoveDirection = normalizedDirection;
             }
+            
+            Logger2.Debug($"InputHandlerComponent: 强制设置移动方向 - 从 {oldDirection} 设置为 {normalizedDirection}");
             OnMoveDirectionChanged?.Invoke(normalizedDirection);
         }
 
@@ -319,6 +362,7 @@ namespace Components
         /// </summary>
         public void SimulateAttack()
         {
+            Logger2.Debug("InputHandlerComponent: 模拟攻击输入");
             IsAttacking = true;
             OnAttackPressed?.Invoke();
         }
@@ -328,8 +372,51 @@ namespace Components
         /// </summary>
         public void SimulateDash(Vector2 direction)
         {
+            Vector2 normalizedDir = direction.Normalized();
+            Logger2.Debug($"InputHandlerComponent: 模拟冲刺输入 - 方向: {normalizedDir}");
             IsDashing = true;
-            OnDashPressed?.Invoke(direction.Normalized());
+            OnDashPressed?.Invoke(normalizedDir);
+        }
+
+        /// <summary>
+        /// 模拟移动输入（用于测试）
+        /// </summary>
+        public void SimulateMovement(Vector2 direction)
+        {
+            Vector2 normalizedDirection = direction.Normalized();
+            
+            // 直接设置移动方向
+            MoveDirection = normalizedDirection;
+            if (normalizedDirection != Vector2.Zero)
+            {
+                LastMoveDirection = normalizedDirection;
+            }
+            
+            Logger2.Debug($"InputHandlerComponent: 模拟移动输入 - 方向: {normalizedDirection}");
+            
+            // 触发移动事件
+            OnMoveDirectionChanged?.Invoke(normalizedDirection);
+        }
+
+        /// <summary>
+        /// 记录当前配置信息
+        /// </summary>
+        private void LogCurrentConfiguration()
+        {
+            Logger2.Debug($"InputHandlerComponent: 当前配置 - " +
+                         $"MoveActions: [{MoveLeftAction}, {MoveRightAction}, {MoveUpAction}, {MoveDownAction}], " +
+                         $"OtherActions: [Attack={AttackAction}, Run={RunAction}, Jump={JumpAction}, Dash={DashAction}], " +
+                         $"InputEnabled: {InputEnabled}");
+        }
+
+        /// <summary>
+        /// 获取当前输入状态摘要
+        /// </summary>
+        public string GetInputStateSummary()
+        {
+            return $"MoveDir:{MoveDirection}, LastDir:{LastMoveDirection}, " +
+                   $"Moving:{IsMoving}, Attacking:{IsAttacking}, Running:{IsRunning}, " +
+                   $"Jumping:{IsJumping}, Dashing:{IsDashing}";
         }
 
         #endregion

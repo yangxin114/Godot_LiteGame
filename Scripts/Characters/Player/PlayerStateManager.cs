@@ -14,6 +14,8 @@ namespace Characters
     /// </summary>
     public partial class PlayerStateManager : Node
     {
+        #region 字段和属性
+
         private Player _player;
         private StateMachine.StateMachine _stateMachine;
         private bool _isInitialized = false;
@@ -30,6 +32,23 @@ namespace Characters
         /// 状态机引用（供外部访问）
         /// </summary>
         public StateMachine.StateMachine StateMachine => _stateMachine;
+
+        #endregion
+
+        #region 生命周期方法
+
+        /// <summary>
+        /// 清理资源
+        /// </summary>
+        public override void _ExitTree()
+        {
+            _stateMachine = null;
+            Logger2.Info("PlayerStateManager: 资源清理完成");
+        }
+
+        #endregion
+
+        #region 初始化和设置
 
         /// <summary>
         /// 初始化状态管理器
@@ -68,6 +87,10 @@ namespace Characters
             // 设置初始状态
             _stateMachine.ChangeState("Idle");
         }
+
+        #endregion
+
+        #region 状态更新和转换
 
         /// <summary>
         /// 每帧更新状态机
@@ -133,7 +156,11 @@ namespace Characters
             // 默认返回闲置状态
             return "Idle";
         }
-        
+
+        #endregion
+
+        #region 状态条件判断
+
         /// <summary>
         /// 检查是否应该死亡
         /// </summary>
@@ -180,7 +207,11 @@ namespace Characters
             // 从移动系统获取移动状态
             return _player?.MovementComponent?.IsMoving ?? false;
         }
-        
+
+        #endregion
+
+        #region 状态控制方法
+
         /// <summary>
         /// 强制切换到指定状态
         /// </summary>
@@ -202,24 +233,6 @@ namespace Characters
             {
                 PlayAnimationForState(stateName);
             }
-        }
-        
-        /// <summary>
-        /// 根据状态播放对应动画
-        /// </summary>
-        private void PlayAnimationForState(string stateName)
-        {
-            string animationName = stateName.ToLower() switch
-            {
-                "idle" => "idle",
-                "move" => "walk",
-                "attack" => "attack",
-                "hurt" => "hurt",
-                "dead" => "death",
-                _ => "idle"
-            };
-            
-            _player?.AnimationComponent?.Play(animationName);
         }
         
         /// <summary>
@@ -258,7 +271,33 @@ namespace Characters
                 
             return true;
         }
-        
+
+        #endregion
+
+        #region 动画系统集成
+
+        /// <summary>
+        /// 根据状态播放对应动画
+        /// </summary>
+        private void PlayAnimationForState(string stateName)
+        {
+            string animationName = stateName.ToLower() switch
+            {
+                "idle" => "idle",
+                "move" => "walk",
+                "attack" => "attack",
+                "hurt" => "hurt",
+                "dead" => "death",
+                _ => "idle"
+            };
+            
+            _player?.AnimationComponent?.Play(animationName);
+        }
+
+        #endregion
+
+        #region 自定义状态管理
+
         /// <summary>
         /// 添加自定义状态
         /// </summary>
@@ -298,14 +337,7 @@ namespace Characters
             
             Logger2.Info("PlayerStateManager: 状态机已重置");
         }
-        
-        /// <summary>
-        /// 清理资源
-        /// </summary>
-        public override void _ExitTree()
-        {
-            _stateMachine = null;
-            Logger2.Info("PlayerStateManager: 资源清理完成");
-        }
+
+        #endregion
     }
 }

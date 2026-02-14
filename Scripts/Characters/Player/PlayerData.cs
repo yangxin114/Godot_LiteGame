@@ -21,10 +21,10 @@ namespace Characters
         [Export] public float MoveSpeed { get; set; }
 
         /// <summary>当前生命值</summary>
-        [Export] public float CurrentHealth { get; set; }
+        [Export] public float CurrentHP { get; set; }
 
         /// <summary>最大生命值</summary>
-        [Export] public float MaxHealth { get; set; }
+        [Export] public float MaxHP { get; set; }
 
     }
 }

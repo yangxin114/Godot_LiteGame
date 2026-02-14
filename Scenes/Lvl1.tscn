@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bsyb2sfds4rgd" path="res://Asserts/Map/tower-defense-2d-vector-tileset/TAILS/PNG/tail_4/36.png" id="3_ywfrw"]
 [ext_resource type="Texture2D" uid="uid://dwu44jv5vg5ba" path="res://Asserts/Map/tower-defense-2d-vector-tileset/TAILS/PNG/tail_4/34.png" id="4_k7aja"]
 [ext_resource type="Texture2D" uid="uid://ccvc3k77cees8" path="res://Asserts/Map/tower-defense-2d-vector-tileset/TAILS/PNG/tail_4/13.png" id="4_ywfrw"]
-[ext_resource type="Script" uid="uid://bw2hosedqhq70" path="res://Scenes/CameraFollow.cs" id="5_k7aja"]
+[ext_resource type="Script" uid="uid://d4ji8qy12l670" path="res://Scenes/CameraFollow.cs" id="5_k7aja"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k7aja"]
 texture = ExtResource("4_ywfrw")

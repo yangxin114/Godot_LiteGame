@@ -11,10 +11,36 @@ namespace Characters
     /// </summary>
     public partial class PlayerStatsManager : Node
     {
+        #region 字段和属性
+
         private Player _player;
         private bool _isInitialized = false;
 
         public StatContainer statContainer = new ();
+
+        #endregion
+
+        #region 生命周期方法
+
+        /// <summary>
+        /// 清理资源
+        /// </summary>
+        public override void _ExitTree()
+        {
+            // 移除事件监听器
+            if (_player?.GetStatContainer() != null)
+            {
+                _player.GetStatContainer().ValueChanged -= OnStatValueChanged;
+                _player.GetStatContainer().ModifierAdded -= OnModifierAdded;
+                _player.GetStatContainer().ModifierRemoved -= OnModifierRemoved;
+            }
+            
+            Logger2.Info("PlayerStatsManager: 资源清理完成");
+        }
+
+        #endregion
+
+        #region 初始化和设置
 
         /// <summary>
         /// 初始化属性管理器
@@ -92,11 +118,11 @@ namespace Characters
             if (_player.PlayerData != null)
             {
                 // 设置生命值
-                if (_player.PlayerData.MaxHealth > 0)
+                if (_player.PlayerData.MaxHP > 0)
                 {
-                    _player.GetStatContainer().SetBase(maxHealthDef, _player.PlayerData.MaxHealth);
+                    _player.GetStatContainer().SetBase(maxHealthDef, _player.PlayerData.MaxHP);
                     _player.GetStatContainer().SetBase(currentHealthDef, 
-                        _player.PlayerData.CurrentHealth > 0 ? _player.PlayerData.CurrentHealth : _player.PlayerData.MaxHealth);
+                        _player.PlayerData.CurrentHP > 0 ? _player.PlayerData.CurrentHP : _player.PlayerData.MaxHP);
                 }
                 
                 // 设置移动速度
@@ -106,7 +132,7 @@ namespace Characters
                 }
                 
                 Logger2.Info("PlayerStatsManager.LoadBaseStatsFromPlayerData: 从PlayerData加载配置 - Health:{0}/{1}, Speed:{2}", 
-                    _player.PlayerData.CurrentHealth, _player.PlayerData.MaxHealth, _player.PlayerData.MoveSpeed);
+                    _player.PlayerData.CurrentHP, _player.PlayerData.MaxHP, _player.PlayerData.MoveSpeed);
             }
             else
             {
@@ -136,7 +162,11 @@ namespace Characters
             
             Logger2.Debug("PlayerStatsManager.SetupStatListeners: 属性监听器设置完成");
         }
-        
+
+        #endregion
+
+        #region 属性事件处理
+
         /// <summary>
         /// 属性值变化回调
         /// </summary>
@@ -204,20 +234,6 @@ namespace Characters
             // TODO: 处理Buff/Debuff移除的视觉反馈
         }
 
-        /// <summary>
-        /// 清理资源
-        /// </summary>
-        public override void _ExitTree()
-        {
-            // 移除事件监听器
-            if (_player?.GetStatContainer() != null)
-            {
-                _player.GetStatContainer().ValueChanged -= OnStatValueChanged;
-                _player.GetStatContainer().ModifierAdded -= OnModifierAdded;
-                _player.GetStatContainer().ModifierRemoved -= OnModifierRemoved;
-            }
-            
-            Logger2.Info("PlayerStatsManager: 资源清理完成");
-        }
+        #endregion
     }
 }
